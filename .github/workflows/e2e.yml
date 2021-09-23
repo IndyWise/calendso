@@ -6,27 +6,42 @@ jobs:
     name: ${{ matrix.node }} and ${{ matrix.os }}
 
     env:
-      DATABASE_URL: postgresql://postgres:@localhost:5432/calendso
+      DATABASE_URL: postgresql://calendsoPostgres:#indywise123@postgres.cekbtf0hdtum.ap-south-1.rds.amazonaws.com:5432/postgres
       NODE_ENV: test
-      BASE_URL: http://localhost:3000
-      # GOOGLE_API_CREDENTIALS: ${{ secrets.CI_GOOGLE_API_CREDENTIALS }}
+      BASE_URL: https://calendso-dev.azurewebsites.net
+      GOOGLE_API_CREDENTIALS:
+        {
+          "web":
+            {
+              "client_id": "20957776680-kriiokf2iud4sg036ebro9ek02fvir3g.apps.googleusercontent.com",
+              "project_id": "sacred-lane-322616",
+              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+              "token_uri": "https://oauth2.googleapis.com/token",
+              "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+              "client_secret": "wXqyswgifZhTYnk4neHIJjhT",
+              "redirect_uris":
+                [
+                  "https://calendso-dev.azurewebsites.net/api/integrations/googlecalendar/callback",
+                  "https://calendso-prod.azurewebsites.net/api/integrations/googlecalendar/callback",
+                ],
+            },
+        }
       # CRON_API_KEY: xxx
       # CALENDSO_ENCRYPTION_KEY: xxx
-      # NEXTAUTH_URL: xxx
+      NEXTAUTH_URL: https://calendso-dev.azurewebsites.net
       # EMAIL_FROM: xxx
       # EMAIL_SERVER_HOST: xxx
       # EMAIL_SERVER_PORT: xxx
       # EMAIL_SERVER_USER: xxx
-      # MS_GRAPH_CLIENT_ID: xxx
-      # MS_GRAPH_CLIENT_SECRET: xxx
-      # ZOOM_CLIENT_ID: xxx
+      MS_GRAPH_CLIENT_ID: ad6e0c53-b181-46bb-9346-7232d5834dd5
+      MS_GRAPH_CLIENT_SECRET: x1L5f_RsybD-3RNk~9a8hq--jk_QzytR69 # ZOOM_CLIENT_ID: xxx
       # ZOOM_CLIENT_SECRET: xxx
     services:
       postgres:
-        image: postgres:12.1
+        image: postgres:13.3
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: calendso
+          POSTGRES_USER: calendsoPostgres
+          POSTGRES_DB: postgres
         ports:
           - 5432:5432
     runs-on: ${{ matrix.os }}
