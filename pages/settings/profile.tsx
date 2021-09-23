@@ -1,35 +1,106 @@
-import { GetServerSideProps } from "next";
-import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
-import prisma, { whereAndSelect } from "@lib/prisma";
-import Modal from "../../components/Modal";
-import Shell from "../../components/Shell";
-import SettingsShell from "../../components/Settings";
-import Avatar from "../../components/Avatar";
-import { getSession } from "next-auth/client";
+import crypto from "crypto";
+import { GetServerSidePropsContext } from "next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { RefObject, useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import TimezoneSelect from "react-timezone-select";
-import { UsernameInput } from "../../components/ui/UsernameInput";
-import ErrorAlert from "../../components/ui/alerts/Error";
-import ImageUploader from "../../components/ImageUploader";
+
+import { getSession } from "@lib/auth";
+import { extractLocaleInfo, localeLabels, localeOptions, OptionType } from "@lib/core/i18n/i18n.utils";
+import { useLocale } from "@lib/hooks/useLocale";
+import { isBrandingHidden } from "@lib/isBrandingHidden";
+import prisma from "@lib/prisma";
+import { inferSSRProps } from "@lib/types/inferSSRProps";
+
+import ImageUploader from "@components/ImageUploader";
+import Modal from "@components/Modal";
+import SettingsShell from "@components/Settings";
+import Shell from "@components/Shell";
+import Avatar from "@components/ui/Avatar";
+import Badge from "@components/ui/Badge";
+import Button from "@components/ui/Button";
+import { UsernameInput } from "@components/ui/UsernameInput";
+import ErrorAlert from "@components/ui/alerts/Error";
 
 const themeOptions = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
 ];
 
-export default function Settings(props) {
+type Props = inferSSRProps<typeof getServerSideProps>;
+function HideBrandingInput(props: {
+  //
+  hideBrandingRef: RefObject<HTMLInputElement>;
+  user: Props["user"];
+}) {
+  const [modelOpen, setModalOpen] = useState(false);
+  return (
+    <>
+      <input
+        id="hide-branding"
+        name="hide-branding"
+        type="checkbox"
+        ref={props.hideBrandingRef}
+        defaultChecked={isBrandingHidden(props.user)}
+        className={
+          "focus:ring-neutral-500 h-4 w-4 text-neutral-900 border-gray-300 rounded-sm disabled:opacity-50"
+        }
+        onClick={(e) => {
+          if (!e.currentTarget.checked || props.user.plan !== "FREE") {
+            return;
+          }
+
+          // prevent checking the input
+          e.preventDefault();
+
+          setModalOpen(true);
+        }}
+      />
+
+      <Modal
+        heading="This feature is only available in paid plan"
+        variant="warning"
+        description={
+          <div className="flex flex-col space-y-3">
+            <p>
+              In order to remove the Cal branding from your booking pages, you need to upgrade to a paid
+              account.
+            </p>
+
+            <p>
+              {" "}
+              To upgrade go to{" "}
+              <a href="https://cal.com/upgrade" className="underline">
+                cal.com/upgrade
+              </a>
+              .
+            </p>
+          </div>
+        }
+        open={modelOpen}
+        handleClose={() => setModalOpen(false)}
+      />
+    </>
+  );
+}
+
+export default function Settings(props: Props) {
+  const { locale } = useLocale({ localeProp: props.localeProp });
+
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const usernameRef = useRef<HTMLInputElement>();
-  const nameRef = useRef<HTMLInputElement>();
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>();
-  const avatarRef = useRef<HTMLInputElement>();
-  const hideBrandingRef = useRef<HTMLInputElement>();
+  const avatarRef = useRef<HTMLInputElement>(null);
+  const hideBrandingRef = useRef<HTMLInputElement>(null);
   const [selectedTheme, setSelectedTheme] = useState({ value: props.user.theme });
   const [selectedTimeZone, setSelectedTimeZone] = useState({ value: props.user.timeZone });
   const [selectedWeekStartDay, setSelectedWeekStartDay] = useState({ value: props.user.weekStart });
-  const [imageSrc, setImageSrc] = useState<string>('');  
-
+  const [selectedLanguage, setSelectedLanguage] = useState<OptionType>({
+    value: locale,
+    label: props.localeLabels[locale],
+  });
+  const [imageSrc, setImageSrc] = useState<string>(props.user.avatar);
   const [hasErrors, setHasErrors] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -38,6 +109,7 @@ export default function Settings(props) {
       props.user.theme ? themeOptions.find((theme) => theme.value === props.user.theme) : null
     );
     setSelectedWeekStartDay({ value: props.user.weekStart, label: props.user.weekStart });
+    setSelectedLanguage({ value: locale, label: props.localeLabels[locale] });
   }, []);
 
   const closeSuccessModal = () => {
@@ -46,13 +118,16 @@ export default function Settings(props) {
 
   const handleAvatarChange = (newAvatar) => {
     avatarRef.current.value = newAvatar;
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-    nativeInputValueSetter.call(avatarRef.current, newAvatar);      
-    const ev2 = new Event('input', { bubbles: true});
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    ).set;
+    nativeInputValueSetter.call(avatarRef.current, newAvatar);
+    const ev2 = new Event("input", { bubbles: true });
     avatarRef.current.dispatchEvent(ev2);
     updateProfileHandler(ev2);
-    setImageSrc(newAvatar);  
-  }
+    setImageSrc(newAvatar);
+  };
 
   const handleError = async (resp) => {
     if (!resp.ok) {
@@ -71,6 +146,7 @@ export default function Settings(props) {
     const enteredTimeZone = selectedTimeZone.value;
     const enteredWeekStartDay = selectedWeekStartDay.value;
     const enteredHideBranding = hideBrandingRef.current.checked;
+    const enteredLanguage = selectedLanguage.value;
 
     // TODO: Add validation
 
@@ -85,6 +161,7 @@ export default function Settings(props) {
         weekStart: enteredWeekStartDay,
         hideBranding: enteredHideBranding,
         theme: selectedTheme ? selectedTheme.value : null,
+        locale: enteredLanguage,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -103,10 +180,6 @@ export default function Settings(props) {
 
   return (
     <Shell heading="Profile" subtitle="Edit your profile information, which shows on your scheduling link.">
-      <Head>
-        <title>Profile | Calendso</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <SettingsShell>
         <form className="divide-y divide-gray-200 lg:col-span-9" onSubmit={updateProfileHandler}>
           {hasErrors && <ErrorAlert message={errorMessage} />}
@@ -147,36 +220,52 @@ export default function Settings(props) {
                       placeholder="A little something about yourself."
                       rows={3}
                       defaultValue={props.user.bio}
-                      className="shadow-sm focus:ring-neutral-500 focus:border-neutral-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-sm"></textarea>
+                      className="shadow-sm focus:ring-neutral-500 focus:border-neutral-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-sm"
+                    ></textarea>
                   </div>
                 </div>
                 <div>
                   <div className="mt-1 flex">
-                      <Avatar
-                        user={props.user}
-                        className="relative rounded-full w-10 h-10"
-                        fallback={<div className="relative bg-neutral-900 rounded-full w-10 h-10"></div>}
-                        imageSrc={imageSrc}
-                      />
-                      <input
-                        ref={avatarRef}
-                        type="hidden"
-                        name="avatar"
-                        id="avatar"
-                        placeholder="URL"
-                        className="mt-1 block w-full border border-gray-300 rounded-sm shadow-sm py-2 px-3 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 sm:text-sm"
-                        defaultValue={props.user.avatar}
-                      />                    
-                      <ImageUploader 
-                        target="avatar"
-                        id="avatar-upload"
-                        buttonMsg="Change avatar"
-                        handleAvatarChange={handleAvatarChange}
-                        imageRef={imageSrc ? imageSrc : props.user.avatar}
-                      />
+                    <Avatar
+                      displayName={props.user.name}
+                      className="relative rounded-full w-10 h-10"
+                      gravatarFallbackMd5={props.user.emailMd5}
+                      imageSrc={imageSrc}
+                    />
+                    <input
+                      ref={avatarRef}
+                      type="hidden"
+                      name="avatar"
+                      id="avatar"
+                      placeholder="URL"
+                      className="mt-1 block w-full border border-gray-300 rounded-sm shadow-sm py-2 px-3 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 sm:text-sm"
+                      defaultValue={imageSrc}
+                    />
+                    <ImageUploader
+                      target="avatar"
+                      id="avatar-upload"
+                      buttonMsg="Change avatar"
+                      handleAvatarChange={handleAvatarChange}
+                      imageRef={imageSrc}
+                    />
                   </div>
                   <hr className="mt-6" />
-                </div>                
+                </div>
+                <div>
+                  <label htmlFor="language" className="block text-sm font-medium text-gray-700">
+                    Language
+                  </label>
+                  <div className="mt-1">
+                    <Select
+                      id="languageSelect"
+                      value={selectedLanguage || locale}
+                      onChange={setSelectedLanguage}
+                      classNamePrefix="react-select"
+                      className="react-select-container border border-gray-300 rounded-sm shadow-sm focus:ring-neutral-500 focus:border-neutral-500 mt-1 block w-full sm:text-sm"
+                      options={props.localeOptions}
+                    />
+                  </div>
+                </div>
                 <div>
                   <label htmlFor="timeZone" className="block text-sm font-medium text-gray-700">
                     Timezone
@@ -245,20 +334,14 @@ export default function Settings(props) {
                 <div>
                   <div className="relative flex items-start">
                     <div className="flex items-center h-5">
-                      <input
-                        id="hide-branding"
-                        name="hide-branding"
-                        type="checkbox"
-                        ref={hideBrandingRef}
-                        defaultChecked={props.user.hideBranding}
-                        className="focus:ring-neutral-500 h-4 w-4 text-neutral-900 border-gray-300 rounded-sm"
-                      />
+                      <HideBrandingInput user={props.user} hideBrandingRef={hideBrandingRef} />
                     </div>
                     <div className="ml-3 text-sm">
                       <label htmlFor="hide-branding" className="font-medium text-gray-700">
-                        Disable Calendso branding
+                        Disable Cal.com branding{" "}
+                        {props.user.plan !== "PRO" && <Badge variant="default">PRO</Badge>}
                       </label>
-                      <p className="text-gray-500">Hide all Calendso branding from your public pages.</p>
+                      <p className="text-gray-500">Hide all Cal.com branding from your public pages.</p>
                     </div>
                   </div>
                 </div>
@@ -303,11 +386,7 @@ export default function Settings(props) {
             </div>
             <hr className="mt-8" />
             <div className="py-4 flex justify-end">
-              <button
-                type="submit"
-                className="ml-2 bg-neutral-900 border border-transparent rounded-sm shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
-                Save
-              </button>
+              <Button type="submit">Save</Button>
             </div>
           </div>
         </form>
@@ -322,21 +401,47 @@ export default function Settings(props) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const session = await getSession(context);
-  if (!session) {
+  const locale = await extractLocaleInfo(context.req);
+
+  if (!session?.user?.id) {
     return { redirect: { permanent: false, destination: "/auth/login" } };
   }
 
-  const user = await whereAndSelect(
-    prisma.user.findFirst,
-    {
+  const user = await prisma.user.findUnique({
+    where: {
       id: session.user.id,
     },
-    ["id", "username", "name", "email", "bio", "avatar", "timeZone", "weekStart", "hideBranding", "theme"]
-  );
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      email: true,
+      bio: true,
+      avatar: true,
+      timeZone: true,
+      weekStart: true,
+      hideBranding: true,
+      theme: true,
+      plan: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User seems logged in but cannot be found in the db");
+  }
 
   return {
-    props: { user }, // will be passed to the page component as props
+    props: {
+      localeProp: locale,
+      localeOptions,
+      localeLabels,
+      user: {
+        ...user,
+        emailMd5: crypto.createHash("md5").update(user.email).digest("hex"),
+      },
+      ...(await serverSideTranslations(locale, ["common"])),
+    },
   };
 };

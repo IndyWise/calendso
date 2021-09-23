@@ -1,6 +1,6 @@
-import { useState } from "react";
-import * as PrimitiveSwitch from "@radix-ui/react-switch";
 import * as Label from "@radix-ui/react-label";
+import * as PrimitiveSwitch from "@radix-ui/react-switch";
+import { useState } from "react";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -23,7 +23,8 @@ export default function Switch(props) {
         className={classNames(checked ? "bg-gray-900" : "bg-gray-400", "rounded-sm w-[36px] p-0.5 h-[20px]")}
         checked={checked}
         onCheckedChange={onPrimitiveCheckedChange}
-        {...primitiveProps}>
+        {...primitiveProps}
+      >
         <PrimitiveSwitch.Thumb
           className={classNames(
             "bg-white w-[16px] h-[16px] block transition-transform",

@@ -1,12 +1,13 @@
+import { TrashIcon } from "@heroicons/react/outline";
+import { Availability } from "@prisma/client";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import React, { useEffect, useState } from "react";
 import TimezoneSelect from "react-timezone-select";
-import { TrashIcon } from "@heroicons/react/outline";
+
 import { WeekdaySelect } from "./WeekdaySelect";
 import SetTimesModal from "./modal/SetTimesModal";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-import { Availability } from "@prisma/client";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -75,7 +76,8 @@ export const Scheduler = ({
         <button
           className="text-sm bg-neutral-100 rounded-sm py-2 px-3"
           type="button"
-          onClick={() => setEditSchedule(idx)}>
+          onClick={() => setEditSchedule(idx)}
+        >
           {dayjs()
             .startOf("day")
             .add(item.startTime, "minutes")
@@ -90,7 +92,8 @@ export const Scheduler = ({
       <button
         type="button"
         onClick={() => removeScheduleAt(idx)}
-        className="btn-sm bg-transparent px-2 py-1 ml-1">
+        className="btn-sm bg-transparent px-2 py-1 ml-1"
+      >
         <TrashIcon className="h-5 w-5 inline text-gray-400 -mt-1" />
       </button>
     </li>
@@ -107,7 +110,7 @@ export const Scheduler = ({
             <div className="mt-1">
               <TimezoneSelect
                 id="timeZone"
-                value={selectedTimeZone}
+                value={{ value: selectedTimeZone }}
                 onChange={(tz) => setTimeZone(tz.value)}
                 className="shadow-sm focus:ring-black focus:border-black mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
               />
