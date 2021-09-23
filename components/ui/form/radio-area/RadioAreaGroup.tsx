@@ -31,7 +31,7 @@ const RadioArea = (props: RadioAreaProps) => {
 
 type RadioAreaGroupProps = {
   name?: string;
-  onChange?: (value) => void;
+  onChange?: (value: any) => void;
 };
 
 const RadioAreaGroup = ({
