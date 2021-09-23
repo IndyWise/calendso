@@ -5309,9 +5309,9 @@ node-releases@^1.1.71, node-releases@^1.1.76:
   version "1.1.76"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.76.tgz#df245b062b0cafbd5282ab6792f7dccc2d97f36e"
 
-nodemailer@^6.4.16, nodemailer@^6.6.3:
-  version "6.6.3"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.6.3.tgz#31fb53dd4d8ae16fc088a65cb9ffa8d928a69b48"
+nodemailer@^6.4.16, nodemailer@^6.6.4:
+  version "6.6.4"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.6.4.tgz#7888b9817cbd59ac842b2b62fb99000cd873f117"
 
 normalize-package-data@^2.3.2:
   version "2.5.0"
