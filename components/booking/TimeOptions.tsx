@@ -1,8 +1,11 @@
+// TODO: replace headlessui with radix-ui
 import { Switch } from "@headlessui/react";
-import TimezoneSelect from "react-timezone-select";
 import { useEffect, useState } from "react";
-import { is24h, timeZone } from "../../lib/clock";
+import TimezoneSelect from "react-timezone-select";
+
 import classNames from "@lib/classNames";
+
+import { is24h, timeZone } from "../../lib/clock";
 
 const TimeOptions = (props) => {
   const [selectedTimeZone, setSelectedTimeZone] = useState("");
@@ -19,9 +22,10 @@ const TimeOptions = (props) => {
     }
   }, [selectedTimeZone]);
 
-  useEffect(() => {
+  const handle24hClockToggle = (is24hClock: boolean) => {
+    setIs24hClock(is24hClock);
     props.onToggle24hClock(is24h(is24hClock));
-  }, [is24hClock]);
+  };
 
   return (
     selectedTimeZone !== "" && (
@@ -35,7 +39,7 @@ const TimeOptions = (props) => {
               </Switch.Label>
               <Switch
                 checked={is24hClock}
-                onChange={setIs24hClock}
+                onChange={handle24hClockToggle}
                 className={classNames(
                   is24hClock ? "bg-black" : "dark:bg-gray-600 bg-gray-200",
                   "relative inline-flex flex-shrink-0 h-5 w-8 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"

@@ -1,9 +1,11 @@
-import Head from "next/head";
-import prisma from "../../lib/prisma";
-import Shell from "../../components/Shell";
-import SettingsShell from "../../components/Settings";
-import { getSession, useSession } from "next-auth/client";
+import { useSession } from "next-auth/client";
+
+import { getSession } from "@lib/auth";
+import prisma from "@lib/prisma";
+
 import Loader from "@components/Loader";
+import SettingsShell from "@components/Settings";
+import Shell from "@components/Shell";
 
 export default function Embed(props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,15 +17,11 @@ export default function Embed(props) {
 
   return (
     <Shell heading="Embed" subtitle="Integrate with your website using our embed options.">
-      <Head>
-        <title>Embed | Calendso</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <SettingsShell>
         <div className="py-6 lg:pb-8 lg:col-span-9">
           <div className="mb-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">iframe Embed</h2>
-            <p className="mt-1 text-sm text-gray-500">The easiest way to embed Calendso on your website.</p>
+            <h2 className="font-cal text-lg leading-6 font-medium text-gray-900">iframe Embed</h2>
+            <p className="mt-1 text-sm text-gray-500">The easiest way to embed Cal.com on your website.</p>
           </div>
           <div className="grid grid-cols-2 space-x-4">
             <div>
@@ -68,12 +66,12 @@ export default function Embed(props) {
             </div>
           </div>
           <div className="my-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Calendso API</h2>
+            <h2 className="font-cal text-lg leading-6 font-medium text-gray-900">Cal.com API</h2>
             <p className="mt-1 text-sm text-gray-500">
               Leverage our API for full control and customizability.
             </p>
           </div>
-          <a href="https://api.docs.calendso.com" className="btn btn-primary">
+          <a href="https://developer.cal.com/api" className="btn btn-primary">
             Browse our API documentation
           </a>
         </div>

@@ -1,10 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/client";
-import prisma from "../../../lib/prisma";
-import { handleLegacyConfirmationMail } from "./[user]";
+
+import { refund } from "@ee/lib/stripe/server";
+
+import { getSession } from "@lib/auth";
 import { CalendarEvent } from "@lib/calendarClient";
 import EventRejectionMail from "@lib/emails/EventRejectionMail";
 import EventManager from "@lib/events/EventManager";
+
+import prisma from "../../../lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   const session = await getSession({ req: req });
@@ -46,6 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         userId: true,
         id: true,
         uid: true,
+        payment: true,
       },
     });
 
@@ -71,13 +75,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const eventManager = new EventManager(currentUser.credentials);
       const scheduleResult = await eventManager.create(evt, booking.uid);
 
-      await handleLegacyConfirmationMail(
-        scheduleResult.results,
-        { requiresConfirmation: false },
-        evt,
-        booking.uid
-      );
-
       await prisma.booking.update({
         where: {
           id: bookingId,
@@ -92,6 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       res.status(204).json({ message: "ok" });
     } else {
+      await refund(booking, evt);
+
       await prisma.booking.update({
         where: {
           id: bookingId,

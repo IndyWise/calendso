@@ -1,25 +1,20 @@
-import Head from "next/head";
-import prisma from "../../lib/prisma";
-import { getIntegrationName, getIntegrationType } from "../../lib/integrations";
-import Shell from "../../components/Shell";
-import { useState } from "react";
+import { useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { getSession, useSession } from "next-auth/client";
+
+import { getSession } from "@lib/auth";
+import { getIntegrationName, getIntegrationType } from "@lib/integrations";
+import prisma from "@lib/prisma";
+
 import Loader from "@components/Loader";
+import Shell from "@components/Shell";
 
 export default function Integration(props) {
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [session, loading] = useSession();
 
-  const [showAPIKey, setShowAPIKey] = useState(false);
-
   if (loading) {
     return <Loader />;
-  }
-
-  function toggleShowAPIKey() {
-    setShowAPIKey(!showAPIKey);
   }
 
   async function deleteIntegrationHandler(event) {
@@ -40,12 +35,9 @@ export default function Integration(props) {
 
   return (
     <div>
-      <Head>
-        <title>{getIntegrationName(props.integration.type)} App | Calendso</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Shell heading={getIntegrationName(props.integration.type)} subtitle="Manage and delete this app.">
+      <Shell
+        heading={`${getIntegrationName(props.integration.type)} App`}
+        subtitle="Manage and delete this app.">
         <div className="block sm:grid grid-cols-3 gap-4">
           <div className="col-span-2 bg-white border border-gray-200 mb-6 overflow-hidden rounded-sm">
             <div className="px-4 py-5 sm:px-6">
@@ -63,29 +55,6 @@ export default function Integration(props) {
                 <div>
                   <dt className="text-sm font-medium text-gray-500">App Category</dt>
                   <dd className="mt-1 text-sm text-gray-900">{getIntegrationType(props.integration.type)}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">API Key</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {!showAPIKey ? (
-                      <span>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
-                    ) : (
-                      <div>
-                        <textarea
-                          name="apikey"
-                          rows={6}
-                          className="shadow-sm focus:ring-neutral-500 focus:border-neutral-500 block w-full sm:text-sm border-gray-300 rounded-sm"
-                          readOnly>
-                          {JSON.stringify(props.integration.key)}
-                        </textarea>
-                      </div>
-                    )}
-                    <button
-                      onClick={toggleShowAPIKey}
-                      className="ml-2 font-medium text-neutral-900 hover:text-neutral-700">
-                      {!showAPIKey ? "Show" : "Hide"}
-                    </button>
-                  </dd>
                 </div>
               </dl>
             </div>
