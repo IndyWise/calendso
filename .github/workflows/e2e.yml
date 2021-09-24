@@ -8,6 +8,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://calendsoPostgres:#indywise123@postgres.cekbtf0hdtum.ap-south-1.rds.amazonaws.com:5432/postgres
       NODE_ENV: test
+<<<<<<< HEAD
       BASE_URL: https://calendso-dev.azurewebsites.net
       GOOGLE_API_CREDENTIALS:
         {
@@ -26,6 +27,11 @@ jobs:
                 ],
             },
         }
+=======
+      BASE_URL: http://localhost:3000
+      JWT_SECRET: secret
+      # GOOGLE_API_CREDENTIALS: ${{ secrets.CI_GOOGLE_API_CREDENTIALS }}
+>>>>>>> 4e06e6e3b16332c19e6546ec81b7b490d80b709f
       # CRON_API_KEY: xxx
       # CALENDSO_ENCRYPTION_KEY: xxx
       NEXTAUTH_URL: https://calendso-dev.azurewebsites.net
