@@ -1,12 +1,11 @@
 // Get router variables
 import { ChevronDownIcon, ChevronUpIcon, ClockIcon, CreditCardIcon, GlobeIcon } from "@heroicons/react/solid";
-import { EventType } from "@prisma/client";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import utc from "dayjs/plugin/utc";
 import { useRouter } from "next/router";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormattedNumber, IntlProvider } from "react-intl";
 
 import { asStringOrNull } from "@lib/asStringOrNull";
@@ -22,18 +21,10 @@ import { HeadSeo } from "@components/seo/head-seo";
 import AvatarGroup from "@components/ui/AvatarGroup";
 import PoweredByCalendso from "@components/ui/PoweredByCalendso";
 
+import { AvailabilityPageProps } from "../../../pages/[user]/[type]";
+
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);
-
-type AvailabilityPageProps = {
-  eventType: EventType;
-  profile: {
-    name: string;
-    image: string;
-    theme?: string;
-  };
-  workingHours: [];
-};
 
 const AvailabilityPage = ({ profile, eventType, workingHours }: AvailabilityPageProps) => {
   const router = useRouter();
@@ -166,10 +157,8 @@ const AvailabilityPage = ({ profile, eventType, workingHours }: AvailabilityPage
                     size={10}
                     truncateAfter={3}
                   />
-                  <h2 className="font-cal font-medium text-gray-500 dark:text-gray-300 mt-3">
-                    {profile.name}
-                  </h2>
-                  <h1 className="mb-4 text-3xl font-semibold text-gray-800 dark:text-white">
+                  <h2 className="font-medium text-gray-500 dark:text-gray-300 mt-3">{profile.name}</h2>
+                  <h1 className="font-cal mb-4 text-3xl font-semibold text-gray-800 dark:text-white">
                     {eventType.title}
                   </h1>
                   <p className="px-2 py-1 mb-1 -ml-2 text-gray-500">
@@ -201,13 +190,7 @@ const AvailabilityPage = ({ profile, eventType, workingHours }: AvailabilityPage
                   periodDays={eventType?.periodDays}
                   periodCountCalendarDays={eventType?.periodCountCalendarDays}
                   onDatePicked={changeDate}
-                  workingHours={[
-                    {
-                      days: [0, 1, 2, 3, 4, 5, 6],
-                      endTime: 1440,
-                      startTime: 0,
-                    },
-                  ]}
+                  workingHours={workingHours}
                   weekStart="Sunday"
                   eventLength={eventType.length}
                   minimumBookingNotice={eventType.minimumBookingNotice}
@@ -231,7 +214,7 @@ const AvailabilityPage = ({ profile, eventType, workingHours }: AvailabilityPage
                 )}
               </div>
             </div>
-            {eventType.users.length && isBrandingHidden(eventType.users[0]) && <PoweredByCalendso />}
+            {(!eventType.users[0] || !isBrandingHidden(eventType.users[0])) && <PoweredByCalendso />}
           </main>
         </div>
       </>
