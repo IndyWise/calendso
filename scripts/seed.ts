@@ -71,7 +71,7 @@ async function createUserAndEventType(opts: {
   });
 
   console.log(
-    `👤 Upserted '${opts.user.username}' with email "${opts.user.email}" & password "${opts.user.password}". Booking page 👉 http://localhost:3000/${opts.user.username}`
+    `👤 Upserted '${opts.user.username}' with email "${opts.user.email}" & password "${opts.user.password}". Booking page 👉 https://calendso-dev.azurewebsites.net/${opts.user.username}`
   );
   for (const rawData of opts.eventTypes) {
     const eventTypeData: Prisma.EventTypeCreateArgs["data"] = { ...rawData };
@@ -106,7 +106,7 @@ async function createUserAndEventType(opts: {
     }
 
     console.log(
-      `\t📆 Event type ${eventTypeData.slug}, length ${eventTypeData.length}: http://localhost:3000/${user.username}/${eventTypeData.slug}`
+      `\t📆 Event type ${eventTypeData.slug}, length ${eventTypeData.length}: https://calendso-dev.azurewebsites.net/${user.username}/${eventTypeData.slug}`
     );
   }
 }
