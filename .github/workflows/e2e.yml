@@ -6,9 +6,9 @@ jobs:
     name: ${{ matrix.node }} and ${{ matrix.os }}
 
     env:
-      DATABASE_URL: postgresql://calendsoPostgres:#indywise123@postgres.cekbtf0hdtum.ap-south-1.rds.amazonaws.com:5432/postgres
+      DATABASE_URL: postgresql://postgresCalendso:%23indywise123@postgresprod.cekbtf0hdtum.ap-south-1.rds.amazonaws.com:5432/postgres
       NODE_ENV: test
-      BASE_URL: https://calendso-dev.azurewebsites.net
+      BASE_URL: https://calendso-prod.azurewebsites.net
       GOOGLE_API_CREDENTIALS:
         {
           "web":
@@ -21,14 +21,14 @@ jobs:
               "client_secret": "wXqyswgifZhTYnk4neHIJjhT",
               "redirect_uris":
                 [
-                  "https://calendso-dev.azurewebsites.net/api/integrations/googlecalendar/callback",
                   "https://calendso-prod.azurewebsites.net/api/integrations/googlecalendar/callback",
+                  "https://calendso-dev.azurewebsites.net/api/integrations/googlecalendar/callback",
                 ],
             },
         }
       # CRON_API_KEY: xxx
       # CALENDSO_ENCRYPTION_KEY: xxx
-      NEXTAUTH_URL: https://calendso-dev.azurewebsites.net
+      NEXTAUTH_URL: https://calendso-prod.azurewebsites.net
       # EMAIL_FROM: xxx
       # EMAIL_SERVER_HOST: xxx
       # EMAIL_SERVER_PORT: xxx
@@ -41,7 +41,7 @@ jobs:
         image: postgres:13.3
         env:
           POSTGRES_USER: calendsoPostgres
-          POSTGRES_DB: postgres
+          POSTGRES_DB: postgresprod
         ports:
           - 5432:5432
     runs-on: ${{ matrix.os }}
