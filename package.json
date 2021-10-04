@@ -15,8 +15,7 @@
     "ts-node": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\"",
     "postinstall": "prisma generate",
     "pre-commit": "lint-staged",
-    "lint": "eslint --fix --ext .ts,.js,.tsx,.jsx",
-    "prepare": "husky install"
+    "lint": "eslint --fix --ext .ts,.js,.tsx,.jsx"
   },
   "engines": {
     "node": "^14.0.0"
@@ -100,7 +99,6 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.25.1",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^7.0.1",
     "jest": "^27.0.6",
     "lint-staged": "^11.1.2",
     "mockdate": "^3.0.5",
