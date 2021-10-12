@@ -8,7 +8,7 @@
     "db-migrate": "yarn prisma migrate dev",
     "db-seed": "yarn ts-node scripts/seed.ts",
     "db-nuke": "docker-compose down --volumes --remove-orphans",
-    "dx": "BASE_URL='https://calendso-prod.azurewebsites.net' JWT_SECRET=secret DATABASE_URL=postgresql://postgresCalendso:%23indywise123@postgresprod.cekbtf0hdtum.ap-south-1.rds.amazonaws.com:5432/postgres eval 'yarn db-up && yarn prisma migrate dev && yarn db-seed && yarn dev'",
+    "dx": "BASE_URL='https://calendso-prod.azurewebsites.net' JWT_SECRET=secret DATABASE_URL=postgresql://calendsoPostgres@calendso-prod:%23indywise123@calendso-prod.postgres.database.azure.com:5432/postgres eval 'yarn db-up && yarn prisma migrate dev && yarn db-seed && yarn dev'",
     "test": "node node_modules/.bin/jest",
     "build": "next build",
     "start": "next start -p ${PORT}",
@@ -71,7 +71,7 @@
     "react-select": "^4.3.1",
     "react-timezone-select": "^1.0.7",
     "short-uuid": "^4.2.0",
-    "stripe": "^8.168.0",
+    "stripe": "^8.181.0",
     "tsdav": "1.0.6",
     "tslog": "^3.2.1",
     "uuid": "^8.3.2"
