@@ -6,7 +6,7 @@ jobs:
     name: ${{ matrix.node }} and ${{ matrix.os }}
 
     env:
-      DATABASE_URL: postgresql://calendsoPostgres:#indywise123@postgres.cekbtf0hdtum.ap-south-1.rds.amazonaws.com:5432/postgres
+      DATABASE_URL: postgresql://calendsoPostgres@calendso-dev:%23indywise123@calendso-dev.postgres.database.azure.com:5432/postgres
       NODE_ENV: test
       BASE_URL: https://calendso-dev.azurewebsites.net
       GOOGLE_API_CREDENTIALS:
