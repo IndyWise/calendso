@@ -1,6 +1,7 @@
 import React, { SyntheticEvent, useState } from "react";
 
 import { ErrorCode } from "@lib/auth";
+import { useLocale } from "@lib/hooks/useLocale";
 
 import { Dialog, DialogContent } from "@components/Dialog";
 import Button from "@components/ui/Button";
@@ -28,7 +29,8 @@ enum SetupStep {
 
 const setupDescriptions = {
   [SetupStep.ConfirmPassword]: "Confirm your current password to get started.",
-  [SetupStep.DisplayQrCode]: "Scan the image below with the authenticator app on your phone.",
+  [SetupStep.DisplayQrCode]:
+    "Scan the image below with the authenticator app on your phone or manually enter the text code instead.",
   [SetupStep.EnterTotpCode]: "Enter the six-digit code from your authenticator app below.",
 };
 
@@ -49,8 +51,10 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
   const [password, setPassword] = useState("");
   const [totpCode, setTotpCode] = useState("");
   const [dataUri, setDataUri] = useState("");
+  const [secret, setSecret] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { t } = useLocale();
 
   async function handleSetup(e: SyntheticEvent) {
     e.preventDefault();
@@ -68,18 +72,19 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
 
       if (response.status === 200) {
         setDataUri(body.dataUri);
+        setSecret(body.secret);
         setStep(SetupStep.DisplayQrCode);
         return;
       }
 
       if (body.error === ErrorCode.IncorrectPassword) {
-        setErrorMessage("Password is incorrect.");
+        setErrorMessage(t("incorrect_password"));
       } else {
-        setErrorMessage("Something went wrong.");
+        setErrorMessage(t("something_went_wrong"));
       }
     } catch (e) {
-      setErrorMessage("Something went wrong.");
-      console.error("Error setting up two-factor authentication", e);
+      setErrorMessage(t("something_went_wrong"));
+      console.error(t("error_enabling_2fa"), e);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,13 +110,13 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
       }
 
       if (body.error === ErrorCode.IncorrectTwoFactorCode) {
-        setErrorMessage("Code is incorrect. Please try again.");
+        setErrorMessage(`${t("code_is_incorrect")} ${t("please_try_again")}`);
       } else {
-        setErrorMessage("Something went wrong.");
+        setErrorMessage(t("something_went_wrong"));
       }
     } catch (e) {
-      setErrorMessage("Something went wrong.");
-      console.error("Error enabling up two-factor authentication", e);
+      setErrorMessage(t("something_went_wrong"));
+      console.error(t("error_enabling_2fa"), e);
     } finally {
       setIsSubmitting(false);
     }
@@ -120,16 +125,13 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
   return (
     <Dialog open={true}>
       <DialogContent>
-        <TwoFactorModalHeader
-          title="Enable two-factor authentication"
-          description={setupDescriptions[step]}
-        />
+        <TwoFactorModalHeader title={t("enable_2fa")} description={setupDescriptions[step]} />
 
         <WithStep step={SetupStep.ConfirmPassword} current={step}>
           <form onSubmit={handleSetup}>
             <div className="mb-4">
-              <label htmlFor="password" className="mt-4 block text-sm font-medium text-gray-700">
-                Password
+              <label htmlFor="password" className="block mt-4 text-sm font-medium text-gray-700">
+                {t("password")}
               </label>
               <div className="mt-1">
                 <input
@@ -148,15 +150,18 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
           </form>
         </WithStep>
         <WithStep step={SetupStep.DisplayQrCode} current={step}>
-          <div className="flex justify-center">
-            <img src={dataUri} />
-          </div>
+          <>
+            <div className="flex justify-center">
+              <img src={dataUri} />
+            </div>
+            <p className="font-mono text-xs text-center">{secret}</p>
+          </>
         </WithStep>
         <WithStep step={SetupStep.EnterTotpCode} current={step}>
           <form onSubmit={handleEnable}>
             <div className="mb-4">
-              <label htmlFor="code" className="mt-4 block text-sm font-medium text-gray-700">
-                Code
+              <label htmlFor="code" className="block mt-4 text-sm font-medium text-gray-700">
+                {t("code")}
               </label>
               <div className="mt-1">
                 <input
@@ -184,14 +189,13 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
               type="submit"
               className="ml-2"
               onClick={handleSetup}
-              disabled={password.length === 0 || isSubmitting}
-            >
-              Continue
+              disabled={password.length === 0 || isSubmitting}>
+              {t("continue")}
             </Button>
           </WithStep>
           <WithStep step={SetupStep.DisplayQrCode} current={step}>
             <Button type="submit" className="ml-2" onClick={() => setStep(SetupStep.EnterTotpCode)}>
-              Continue
+              {t("continue")}
             </Button>
           </WithStep>
           <WithStep step={SetupStep.EnterTotpCode} current={step}>
@@ -199,13 +203,12 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
               type="submit"
               className="ml-2"
               onClick={handleEnable}
-              disabled={totpCode.length !== 6 || isSubmitting}
-            >
-              Enable
+              disabled={totpCode.length !== 6 || isSubmitting}>
+              {t("enable")}
             </Button>
           </WithStep>
           <Button color="secondary" onClick={onCancel}>
-            Cancel
+            {t("cancel")}
           </Button>
         </div>
       </DialogContent>

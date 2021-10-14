@@ -1,51 +1,22 @@
-import { getSession, useSession } from "next-auth/client";
 import React from "react";
 
-import prisma from "@lib/prisma";
+import { useLocale } from "@lib/hooks/useLocale";
+import { trpc } from "@lib/trpc";
 
-import Loader from "@components/Loader";
-import SettingsShell from "@components/Settings";
+import SettingsShell from "@components/SettingsShell";
 import Shell from "@components/Shell";
 import ChangePasswordSection from "@components/security/ChangePasswordSection";
 import TwoFactorAuthSection from "@components/security/TwoFactorAuthSection";
 
-export default function Security({ user }) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [session, loading] = useSession();
-
-  if (loading) {
-    return <Loader />;
-  }
-
+export default function Security() {
+  const user = trpc.useQuery(["viewer.me"]).data;
+  const { t } = useLocale();
   return (
-    <Shell heading="Security" subtitle="Manage your account's security.">
+    <Shell heading={t("security")} subtitle={t("manage_account_security")}>
       <SettingsShell>
         <ChangePasswordSection />
-        <TwoFactorAuthSection twoFactorEnabled={user.twoFactorEnabled} />
+        <TwoFactorAuthSection twoFactorEnabled={user?.twoFactorEnabled} />
       </SettingsShell>
     </Shell>
   );
-}
-
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) {
-    return { redirect: { permanent: false, destination: "/auth/login" } };
-  }
-
-  const user = await prisma.user.findFirst({
-    where: {
-      email: session.user.email,
-    },
-    select: {
-      id: true,
-      username: true,
-      name: true,
-      twoFactorEnabled: true,
-    },
-  });
-
-  return {
-    props: { user }, // will be passed to the page component as props
-  };
 }

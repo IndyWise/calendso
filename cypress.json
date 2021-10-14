@@ -1,4 +1,7 @@
 {
-  "baseUrl": "https://calendso-dev.azurewebsites.net",
-  "chromeWebSecurity": false
+  "baseUrl": "http://localhost:3000",
+  "chromeWebSecurity": false,
+  "retries": {
+    "runMode": 2
+  }
 }

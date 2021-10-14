@@ -1,16 +1,14 @@
 import { UsersIcon } from "@heroicons/react/outline";
 import { PlusIcon } from "@heroicons/react/solid";
-import { GetServerSideProps } from "next";
-import type { Session } from "next-auth";
 import { useSession } from "next-auth/client";
 import { useEffect, useRef, useState } from "react";
 
-import { getSession } from "@lib/auth";
+import { useLocale } from "@lib/hooks/useLocale";
 import { Member } from "@lib/member";
 import { Team } from "@lib/team";
 
 import Loader from "@components/Loader";
-import SettingsShell from "@components/Settings";
+import SettingsShell from "@components/SettingsShell";
 import Shell from "@components/Shell";
 import EditTeam from "@components/team/EditTeam";
 import TeamList from "@components/team/TeamList";
@@ -18,6 +16,7 @@ import TeamListItem from "@components/team/TeamListItem";
 import Button from "@components/ui/Button";
 
 export default function Teams() {
+  const { t } = useLocale();
   const noop = () => undefined;
   const [, loading] = useSession();
   const [teams, setTeams] = useState([]);
@@ -78,7 +77,7 @@ export default function Teams() {
   };
 
   return (
-    <Shell heading="Teams" subtitle="Create and manage teams to use collaborative features.">
+    <Shell heading={t("teams")} subtitle={t("create_manage_teams_collaborative")}>
       <SettingsShell>
         {!editTeamEnabled && (
           <div className="divide-y divide-gray-200 lg:col-span-9">
@@ -89,10 +88,10 @@ export default function Teams() {
                     <div className="sm:rounded-sm">
                       <div className="pb-5 pr-4 sm:pb-6">
                         <h3 className="text-lg font-medium leading-6 text-gray-900">
-                          Create a team to get started
+                          {t("create_team_to_get_started")}
                         </h3>
                         <div className="max-w-xl mt-2 text-sm text-gray-500">
-                          <p>Create your first team and invite other users to work together with you.</p>
+                          <p>{t("create_first_team_and_invite_others")}</p>
                         </div>
                       </div>
                     </div>
@@ -102,10 +101,9 @@ export default function Teams() {
                   <Button
                     type="button"
                     onClick={() => setShowCreateTeamModal(true)}
-                    className="btn btn-white"
-                  >
+                    className="btn btn-white">
                     <PlusIcon className="group-hover:text-black text-gray-700 w-3.5 h-3.5 mr-2 inline-block" />
-                    New Team
+                    {t("new_team")}
                   </Button>
                 </div>
               </div>
@@ -116,15 +114,14 @@ export default function Teams() {
 
                 {!!invites.length && (
                   <div>
-                    <h2 className="font-cal text-lg font-medium leading-6 text-gray-900">Open Invitations</h2>
+                    <h2 className="text-lg font-medium leading-6 text-gray-900 font-cal">Open Invitations</h2>
                     <ul className="px-4 mt-4 mb-2 bg-white border divide-y divide-gray-200 rounded">
                       {invites.map((team: Team) => (
                         <TeamListItem
                           onChange={loadData}
                           key={team.id}
                           team={team}
-                          onActionSelect={noop}
-                        ></TeamListItem>
+                          onActionSelect={noop}></TeamListItem>
                       ))}
                     </ul>
                   </div>
@@ -139,13 +136,11 @@ export default function Teams() {
             className="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-title"
             role="dialog"
-            aria-modal="true"
-          >
+            aria-modal="true">
             <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 z-0 transition-opacity bg-gray-500 bg-opacity-75"
-                aria-hidden="true"
-              ></div>
+                aria-hidden="true"></div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
                 &#8203;
@@ -158,17 +153,17 @@ export default function Teams() {
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 className="text-lg font-medium leading-6 text-gray-900" id="modal-title">
-                      Create a new team
+                      {t("create_new_team")}
                     </h3>
                     <div>
-                      <p className="text-sm text-gray-400">Create a new team to collaborate with users.</p>
+                      <p className="text-sm text-gray-400">{t("create_new_team_description")}</p>
                     </div>
                   </div>
                 </div>
                 <form onSubmit={createTeam}>
                   <div className="mb-4">
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                      Name
+                      {t("name")}
                     </label>
                     <input
                       ref={nameRef}
@@ -182,14 +177,13 @@ export default function Teams() {
                   </div>
                   <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button type="submit" className="btn btn-primary">
-                      Create team
+                      {t("create_team")}
                     </button>
                     <button
                       onClick={() => setShowCreateTeamModal(false)}
                       type="button"
-                      className="mr-2 btn btn-white"
-                    >
-                      Cancel
+                      className="mr-2 btn btn-white">
+                      {t("cancel")}
                     </button>
                   </div>
                 </form>
@@ -201,15 +195,3 @@ export default function Teams() {
     </Shell>
   );
 }
-
-// Export the `session` prop to use sessions with Server Side Rendering
-export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async (context) => {
-  const session = await getSession(context);
-  if (!session) {
-    return { redirect: { permanent: false, destination: "/auth/login" } };
-  }
-
-  return {
-    props: { session },
-  };
-};
