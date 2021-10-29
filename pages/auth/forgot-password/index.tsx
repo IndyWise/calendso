@@ -1,4 +1,4 @@
-import debounce from "lodash.debounce";
+import debounce from "lodash/debounce";
 import { getCsrfToken } from "next-auth/client";
 import Link from "next/link";
 import React from "react";
@@ -102,6 +102,7 @@ export default function ForgotPassword({ csrfToken }) {
                       id="email"
                       name="email"
                       type="email"
+                      inputMode="email"
                       autoComplete="email"
                       placeholder="john.doe@example.com"
                       required
