@@ -8,13 +8,13 @@
     "analyze:browser": "BUNDLE_ANALYZE=browser next build",
     "dev": "next dev",
     "db-up": "docker-compose up -d",
-    "db-migrate": "yarn prisma migrate dev",
-    "db-seed": "yarn ts-node scripts/seed.ts",
+    "db-migrate": "npm prisma migrate dev",
+    "db-seed": "npm ts-node scripts/seed.ts",
     "db-nuke": "docker-compose down --volumes --remove-orphans",
     "dx": "cross-env BASE_URL=https://calendso-dev.azurewebsites.net JWT_SECRET=secret DATABASE_URL=postgresql://calendsoPostgres@calendso-dev:%23indywise123@calendso-dev.postgres.database.azure.com:5432/postgres run-s db-up db-migrate db-seed dev",
     "test": "jest",
     "test-playwright": "jest --config jest.playwright.config.js",
-    "test-playwright-lcov": "cross-env PLAYWRIGHT_HEADLESS=1 PLAYWRIGHT_COVERAGE=1 yarn test-playwright && nyc report --reporter=lcov",
+    "test-playwright-lcov": "cross-env PLAYWRIGHT_HEADLESS=1 PLAYWRIGHT_COVERAGE=1 npm test-playwright && nyc report --reporter=lcov",
     "build": "next build",
     "start": "next start -p ${PORT}",
     "ts-node": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\"",
@@ -24,7 +24,7 @@
   },
   "engines": {
     "node": "14.x",
-    "yarn": ">=1.19.0 < 2.0.0"
+    "npm": ">=8.1.1"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.16.0",

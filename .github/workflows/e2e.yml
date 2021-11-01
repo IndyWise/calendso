@@ -67,14 +67,14 @@ jobs:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-nextjs
 
-      - run: yarn test
-      - run: yarn prisma migrate deploy
-      - run: yarn db-seed
-      - run: yarn build
-      - run: yarn start &
+      - run: npm test
+      - run: npm prisma migrate deploy
+      - run: npm db-seed
+      - run: npm build
+      - run: npm start &
       - run: npx wait-port 3000 --timeout 10000
-      - run: yarn playwright install-deps
-      - run: yarn test-playwright
+      - run: npm playwright install-deps
+      - run: npm test-playwright
 
       - name: Upload videos
         if: ${{ always() }}

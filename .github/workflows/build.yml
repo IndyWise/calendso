@@ -41,6 +41,6 @@ jobs:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-nextjs
 
-      - run: yarn prisma migrate deploy
-      - run: yarn test
-      - run: yarn build
+      - run: npm prisma migrate deploy
+      - run: npm test
+      - run: npm build
