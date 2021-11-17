@@ -6,6 +6,7 @@ jobs:
     name: ${{ matrix.node }} and ${{ matrix.os }}
 
     env:
+<<<<<<< HEAD
       DATABASE_URL: postgresql://calendsoPostgres@calendso-dev:%23indywise123@calendso-dev.postgres.database.azure.com:5432/postgres
       NODE_ENV: test
       BASE_URL: https://calendso-dev.azurewebsites.net
@@ -26,6 +27,13 @@ jobs:
                 ],
             },
         }
+=======
+      DATABASE_URL: postgresql://postgres:@localhost:5432/calendso
+      BASE_URL: http://localhost:3000
+      JWT_SECRET: secret
+      GOOGLE_API_CREDENTIALS: "{}"
+      # GOOGLE_API_CREDENTIALS: ${{ secrets.CI_GOOGLE_API_CREDENTIALS }}
+>>>>>>> f3c95fa3de5b90859fde71cfe387dec8cc064fba
       # CRON_API_KEY: xxx
       # CALENDSO_ENCRYPTION_KEY: xxx
       NEXTAUTH_URL: https://calendso-dev.azurewebsites.net
@@ -65,7 +73,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}-nextjs
 
       - run: npm test
       - run: npm prisma migrate deploy
@@ -73,8 +81,26 @@ jobs:
       - run: npm build
       - run: npm start &
       - run: npx wait-port 3000 --timeout 10000
+<<<<<<< HEAD
       - run: npm playwright install-deps
       - run: npm test-playwright
+=======
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v2
+        id: playwright-cache
+        with:
+          path: |
+            ~/Library/Caches/ms-playwright
+            ~/.cache/ms-playwright
+            **/node_modules/playwright
+          key: cache-playwright-${{ hashFiles('**/yarn.lock') }}
+      - name: Install playwright deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: yarn playwright install-deps
+
+      - run: yarn test-playwright
+>>>>>>> f3c95fa3de5b90859fde71cfe387dec8cc064fba
 
       - name: Upload videos
         if: ${{ always() }}
