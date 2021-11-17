@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const withTM = require("@vercel/edge-functions-ui/transpile")(["react-timezone-select"]);
 const { i18n } = require("./next-i18next.config");
-
+const compress = process.env.NEXT_COMPRESS ? !!process.env.NEXT_COMPRESS : true;
+const assetPrefix = process.env.NEXT_PUBLIC_CDN_URL || "";
+const buildId = process.env.NEXT_PUBLIC_BUILD_ID || null;
 // So we can test deploy previews preview
 if (process.env.VERCEL_URL && !process.env.BASE_URL) {
   process.env.BASE_URL = "https://" + process.env.VERCEL_URL;
@@ -55,11 +57,17 @@ plugins.push(withTM);
 
 // prettier-ignore
 module.exports = () => plugins.reduce((acc, next) => next(acc), {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  productionBrowserSourceMaps: true,
   i18n,
   eslint: {
     // This allows production builds to successfully complete even if the project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  compress,
+  assetPrefix,
+  generateBuildId: async () => buildId,
   typescript: {
     ignoreBuildErrors: true,
   },

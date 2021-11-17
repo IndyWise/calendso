@@ -17,7 +17,7 @@
     "test-codegen": "yarn playwright codegen http://localhost:3000",
     "type-check": "tsc --pretty --noEmit",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "ts-node": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\"",
     "postinstall": "prisma generate",
     "pre-commit": "lint-staged",
@@ -30,6 +30,7 @@
     "yarn": ">=1.19.0 < 2.0.0"
   },
   "dependencies": {
+    "@microsoft/applicationinsights-web": "^2.7.0",
     "@daily-co/daily-js": "^0.21.0",
     "@headlessui/react": "^1.4.1",
     "@heroicons/react": "^1.0.5",
@@ -54,6 +55,7 @@
     "@trpc/server": "^9.12.0",
     "@vercel/edge-functions-ui": "^0.2.1",
     "@wojtekmaj/react-daterange-picker": "^3.3.1",
+    "applicationinsights": "^2.1.6",
     "accept-language-parser": "^1.5.0",
     "async": "^3.2.1",
     "bcryptjs": "^2.4.3",
@@ -92,6 +94,7 @@
     "stripe": "^8.168.0",
     "superjson": "1.8.0",
     "tsdav": "1.0.6",
+    "tslib": "^2.3.1",
     "tslog": "^3.2.1",
     "uuid": "^8.3.2",
     "zod": "^3.8.2"
