@@ -1,27 +1,31 @@
-import debounce from "lodash.debounce";
+import debounce from "lodash/debounce";
+import { GetServerSidePropsContext } from "next";
 import { getCsrfToken } from "next-auth/client";
 import Link from "next/link";
-import React from "react";
+import React, { SyntheticEvent } from "react";
 
 import { getSession } from "@lib/auth";
+import { useLocale } from "@lib/hooks/useLocale";
 
 import { HeadSeo } from "@components/seo/head-seo";
 
-export default function ForgotPassword({ csrfToken }) {
+export default function ForgotPassword({ csrfToken }: { csrfToken: string }) {
+  const { t, i18n } = useLocale();
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
+  const [error, setError] = React.useState<{ message: string } | null>(null);
   const [success, setSuccess] = React.useState(false);
   const [email, setEmail] = React.useState("");
 
-  const handleChange = (e) => {
-    setEmail(e.target.value);
+  const handleChange = (e: SyntheticEvent) => {
+    const target = e.target as typeof e.target & { value: string };
+    setEmail(target.value);
   };
 
-  const submitForgotPasswordRequest = async ({ email }) => {
+  const submitForgotPasswordRequest = async ({ email }: { email: string }) => {
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
-        body: JSON.stringify({ email: email }),
+        body: JSON.stringify({ email: email, language: i18n.language }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -36,7 +40,7 @@ export default function ForgotPassword({ csrfToken }) {
 
       return json;
     } catch (reason) {
-      setError({ message: "An unexpected error occurred. Try again." });
+      setError({ message: t("unexpected_error_try_again") });
     } finally {
       setLoading(false);
     }
@@ -44,7 +48,7 @@ export default function ForgotPassword({ csrfToken }) {
 
   const debouncedHandleSubmitPasswordRequest = debounce(submitForgotPasswordRequest, 250);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
 
     if (!email) {
@@ -65,36 +69,33 @@ export default function ForgotPassword({ csrfToken }) {
   const Success = () => {
     return (
       <div className="space-y-6">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Done</h2>
-        <p>Check your email. We sent you a link to reset your password.</p>
+        <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900">{t("done")}</h2>
+        <p>{t("check_email_reset_password")}</p>
         {error && <p className="text-red-600">{error.message}</p>}
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <HeadSeo title="Forgot Password" description="Forgot Password" />
+    <div className="flex flex-col justify-center min-h-screen py-12 bg-gray-50 sm:px-6 lg:px-8">
+      <HeadSeo title={t("forgot_password")} description={t("forgot_password")} />
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 mx-2 shadow rounded-lg sm:px-10 space-y-6">
+        <div className="px-4 py-8 mx-2 space-y-6 bg-white rounded-lg shadow sm:px-10">
           {success && <Success />}
           {!success && (
             <>
               <div className="space-y-6">
-                <h2 className="font-cal mt-6 text-center text-3xl font-extrabold text-gray-900">
-                  Forgot Password
+                <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900 font-cal">
+                  {t("forgot_password")}
                 </h2>
-                <p>
-                  Enter the email address associated with your account and we will send you a link to reset
-                  your password.
-                </p>
+                <p>{t("reset_instructions")}</p>
                 {error && <p className="text-red-600">{error.message}</p>}
               </div>
               <form className="space-y-6" onSubmit={handleSubmit} action="#">
                 <input name="csrfToken" type="hidden" defaultValue={csrfToken} hidden />
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email address
+                    {t("email_address")}
                   </label>
                   <div className="mt-1">
                     <input
@@ -102,10 +103,11 @@ export default function ForgotPassword({ csrfToken }) {
                       id="email"
                       name="email"
                       type="email"
+                      inputMode="email"
                       autoComplete="email"
                       placeholder="john.doe@example.com"
                       required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
                     />
                   </div>
                 </div>
@@ -114,13 +116,13 @@ export default function ForgotPassword({ csrfToken }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
+                    className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
                       loading ? "cursor-not-allowed" : ""
                     }`}
                   >
                     {loading && (
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -140,16 +142,15 @@ export default function ForgotPassword({ csrfToken }) {
                         ></path>
                       </svg>
                     )}
-                    Request Password Reset
+                    {t("request_password_reset")}
                   </button>
                 </div>
                 <div className="space-y-2">
                   <Link href="/auth/login">
                     <button
                       type="button"
-                      className="w-full flex justify-center py-2 px-4 text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-                    >
-                      Login
+                      className="flex justify-center w-full px-4 py-2 text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+                      {t("login")}
                     </button>
                   </Link>
                 </div>
@@ -162,7 +163,7 @@ export default function ForgotPassword({ csrfToken }) {
   );
 }
 
-ForgotPassword.getInitialProps = async (context) => {
+ForgotPassword.getInitialProps = async (context: GetServerSidePropsContext) => {
   const { req, res } = context;
   const session = await getSession({ req });
 

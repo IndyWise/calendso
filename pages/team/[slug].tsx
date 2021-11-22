@@ -1,12 +1,15 @@
 import { ArrowRightIcon } from "@heroicons/react/solid";
-import { InferGetServerSidePropsType } from "next";
+import { Prisma } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import React from "react";
 
+import { useLocale } from "@lib/hooks/useLocale";
 import useTheme from "@lib/hooks/useTheme";
 import { useToggleQuery } from "@lib/hooks/useToggleQuery";
 import prisma from "@lib/prisma";
 import { defaultAvatarSrc } from "@lib/profile";
+import { inferSSRProps } from "@lib/types/inferSSRProps";
 
 import EventTypeDescription from "@components/eventtype/EventTypeDescription";
 import { HeadSeo } from "@components/seo/head-seo";
@@ -16,22 +19,22 @@ import AvatarGroup from "@components/ui/AvatarGroup";
 import Button from "@components/ui/Button";
 import Text from "@components/ui/Text";
 
-function TeamPage({ team }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+function TeamPage({ team }: inferSSRProps<typeof getServerSideProps>) {
   const { isReady } = useTheme();
   const showMembers = useToggleQuery("members");
+  const { t } = useLocale();
 
   const eventTypes = (
     <ul className="space-y-3">
       {team.eventTypes.map((type) => (
         <li
           key={type.id}
-          className="group relative dark:bg-neutral-900 dark:border-0 dark:hover:border-neutral-600 bg-white hover:bg-gray-50 border border-neutral-200 hover:border-black rounded-sm"
-        >
-          <ArrowRightIcon className="absolute transition-opacity h-4 w-4 right-3 top-3 text-black dark:text-white opacity-0 group-hover:opacity-100" />
+          className="relative bg-white border rounded-sm group dark:bg-neutral-900 dark:border-0 dark:hover:border-neutral-600 hover:bg-gray-50 border-neutral-200 hover:border-brand">
+          <ArrowRightIcon className="absolute w-4 h-4 text-black transition-opacity opacity-0 right-3 top-3 dark:text-white group-hover:opacity-100" />
           <Link href={`${team.slug}/${type.slug}`}>
-            <a className="px-6 py-4 flex justify-between">
+            <a className="flex justify-between px-6 py-4">
               <div className="flex-shrink">
-                <h2 className="font-cal font-semibold text-neutral-900 dark:text-white">{type.title}</h2>
+                <h2 className="font-semibold font-cal text-neutral-900 dark:text-white">{type.title}</h2>
                 <EventTypeDescription className="text-sm" eventType={type} />
               </div>
               <div className="mt-1">
@@ -40,8 +43,8 @@ function TeamPage({ team }: InferGetServerSidePropsType<typeof getServerSideProp
                   className="flex-shrink-0"
                   size={10}
                   items={type.users.map((user) => ({
-                    alt: user.name,
-                    image: user.avatar,
+                    alt: user.name || "",
+                    image: user.avatar || "",
                   }))}
                 />
               </div>
@@ -52,22 +55,20 @@ function TeamPage({ team }: InferGetServerSidePropsType<typeof getServerSideProp
     </ul>
   );
 
+  const teamName = team.name || "Nameless Team";
+
   return (
     isReady && (
       <div>
-        <HeadSeo title={team.name} description={team.name} />
-        <div className="pt-24 pb-12 px-4">
+        <HeadSeo title={teamName} description={teamName} />
+        <div className="px-4 pt-24 pb-12">
           <div className="mb-8 text-center">
-            <Avatar
-              displayName={team.name}
-              imageSrc={team.logo}
-              className="mx-auto w-20 h-20 rounded-full mb-4"
-            />
-            <Text variant="headline">{team.name}</Text>
+            <Avatar alt={teamName} imageSrc={team.logo} className="w-20 h-20 mx-auto mb-4 rounded-full" />
+            <Text variant="headline">{teamName}</Text>
           </div>
           {(showMembers.isOn || !team.eventTypes.length) && <Team team={team} />}
-          {!showMembers.isOn && team.eventTypes.length && (
-            <div className="mx-auto max-w-3xl">
+          {!showMembers.isOn && team.eventTypes.length > 0 && (
+            <div className="max-w-3xl mx-auto">
               {eventTypes}
 
               <div className="relative mt-12">
@@ -75,20 +76,19 @@ function TeamPage({ team }: InferGetServerSidePropsType<typeof getServerSideProp
                   <div className="w-full border-t border-gray-200 dark:border-gray-900" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="px-2 bg-gray-100 text-sm text-gray-500 dark:bg-black dark:text-gray-500">
-                    OR
+                  <span className="px-2 text-sm text-gray-500 bg-gray-100 dark:bg-brand dark:text-gray-500">
+                    {t("or")}
                   </span>
                 </div>
               </div>
 
-              <aside className="text-center dark:text-white mt-8">
+              <aside className="mt-8 text-center dark:text-white">
                 <Button
                   color="secondary"
                   EndIcon={ArrowRightIcon}
                   href={`/team/${team.slug}?members=1`}
-                  shallow={true}
-                >
-                  Book a team member instead
+                  shallow={true}>
+                  {t("book_a_team_member")}
                 </Button>
               </aside>
             </div>
@@ -99,10 +99,19 @@ function TeamPage({ team }: InferGetServerSidePropsType<typeof getServerSideProp
   );
 }
 
-export const getServerSideProps = async (context) => {
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const slug = Array.isArray(context.query?.slug) ? context.query.slug.pop() : context.query.slug;
 
-  const teamSelectInput = {
+  const userSelect = Prisma.validator<Prisma.UserSelect>()({
+    username: true,
+    avatar: true,
+    email: true,
+    name: true,
+    id: true,
+    bio: true,
+  });
+
+  const teamSelect = Prisma.validator<Prisma.TeamSelect>()({
     id: true,
     name: true,
     slug: true,
@@ -110,13 +119,7 @@ export const getServerSideProps = async (context) => {
     members: {
       select: {
         user: {
-          select: {
-            username: true,
-            avatar: true,
-            name: true,
-            id: true,
-            bio: true,
-          },
+          select: userSelect,
         },
       },
     },
@@ -131,36 +134,29 @@ export const getServerSideProps = async (context) => {
         length: true,
         slug: true,
         schedulingType: true,
+        price: true,
+        currency: true,
         users: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-            email: true,
-          },
+          select: userSelect,
         },
       },
     },
-  };
+  });
 
   const team = await prisma.team.findUnique({
     where: {
       slug,
     },
-    select: teamSelectInput,
+    select: teamSelect,
   });
 
-  if (!team) {
-    return {
-      notFound: true,
-    };
-  }
+  if (!team) return { notFound: true };
 
   team.eventTypes = team.eventTypes.map((type) => ({
     ...type,
     users: type.users.map((user) => ({
       ...user,
-      avatar: user.avatar || defaultAvatarSrc({ email: user.email }),
+      avatar: user.avatar || defaultAvatarSrc({ email: user.email || "" }),
     })),
   }));
 

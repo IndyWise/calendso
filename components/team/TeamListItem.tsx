@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import { useLocale } from "@lib/hooks/useLocale";
 import showToast from "@lib/notification";
 
 import { Dialog, DialogTrigger } from "@components/Dialog";
@@ -36,6 +37,7 @@ export default function TeamListItem(props: {
   onActionSelect: (text: string) => void;
 }) {
   const [team, setTeam] = useState<Team | null>(props.team);
+  const { t } = useLocale();
 
   const acceptInvite = () => invitationResponse(true);
   const declineInvite = () => invitationResponse(false);
@@ -59,58 +61,61 @@ export default function TeamListItem(props: {
         <div className="flex justify-between my-4">
           <div className="flex">
             <Avatar
+              size={9}
               imageSrc={
                 props.team.logo
                   ? props.team.logo
                   : "https://eu.ui-avatars.com/api/?background=fff&color=039be5&name=" +
                     encodeURIComponent(props.team.name || "")
               }
-              displayName="Team Logo"
+              alt="Team Logo"
               className="rounded-full w-9 h-9"
             />
             <div className="inline-block ml-3">
               <span className="text-sm font-bold text-neutral-700">{props.team.name}</span>
               <span className="block -mt-1 text-xs text-gray-400">
-                {window.location.hostname}/{props.team.slug}
+                {process.env.NEXT_PUBLIC_APP_URL}/team/{props.team.slug}
               </span>
             </div>
           </div>
           {props.team.role === "INVITEE" && (
             <div>
               <Button type="button" color="secondary" onClick={declineInvite}>
-                Reject
+                {t("reject")}
               </Button>
               <Button type="button" color="primary" className="ml-1" onClick={acceptInvite}>
-                Accept
+                {t("accept")}
               </Button>
             </div>
           )}
           {props.team.role === "MEMBER" && (
             <div>
               <Button type="button" color="primary" onClick={declineInvite}>
-                Leave
+                {t("leave")}
               </Button>
             </div>
           )}
           {props.team.role === "OWNER" && (
-            <div className="flex">
+            <div className="flex space-x-4">
               <span className="self-center h-6 px-3 py-1 text-xs text-gray-700 capitalize rounded-md bg-gray-50">
-                Owner
+                {t("owner")}
               </span>
-              <Tooltip content="Copy link">
+              <Tooltip content={t("copy_link")}>
                 <Button
                   onClick={() => {
-                    navigator.clipboard.writeText(window.location.hostname + "/team/" + props.team.slug);
-                    showToast("Link copied!", "success");
+                    navigator.clipboard.writeText(
+                      process.env.NEXT_PUBLIC_APP_URL + "/team/" + props.team.slug
+                    );
+                    showToast(t("link_copied"), "success");
                   }}
+                  size="icon"
                   color="minimal"
-                  className="w-full pl-5 ml-8"
                   StartIcon={LinkIcon}
                   type="button"
-                ></Button>
+                />
               </Tooltip>
               <Dropdown>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger className="w-10 h-10 p-0 border border-transparent group text-neutral-400 hover:border-gray-200">
                   <DotsHorizontalIcon className="w-5 h-5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -123,15 +128,15 @@ export default function TeamListItem(props: {
                       StartIcon={PencilAltIcon}
                     >
                       {" "}
-                      Edit team
+                      {t("edit_team")}
                     </Button>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="">
-                    <Link href={`/team/${props.team.slug}`} passHref={true}>
+                  <DropdownMenuItem>
+                    <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/team/${props.team.slug}`} passHref={true}>
                       <a target="_blank">
                         <Button type="button" color="minimal" className="w-full" StartIcon={ExternalLinkIcon}>
                           {" "}
-                          Preview team page
+                          {t("preview_team")}
                         </Button>
                       </a>
                     </Link>
@@ -145,20 +150,16 @@ export default function TeamListItem(props: {
                           }}
                           color="warn"
                           StartIcon={TrashIcon}
-                          className="w-full"
-                        >
-                          Disband Team
+                          className="w-full">
+                          {t("disband_team")}
                         </Button>
                       </DialogTrigger>
                       <ConfirmationDialogContent
                         variety="danger"
-                        title="Disband Team"
-                        confirmBtnText="Yes, disband team"
-                        cancelBtnText="Cancel"
-                        onConfirm={() => props.onActionSelect("disband")}
-                      >
-                        Are you sure you want to disband this team? Anyone who you&apos;ve shared this team
-                        link with will no longer be able to book using it.
+                        title={t("disband_team")}
+                        confirmBtnText={t("confirm_disband_team")}
+                        onConfirm={() => props.onActionSelect("disband")}>
+                        {t("disband_team_confirmation_message")}
                       </ConfirmationDialogContent>
                     </Dialog>
                   </DropdownMenuItem>

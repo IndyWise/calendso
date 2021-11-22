@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getSession } from "@lib/auth";
 
+import { encodeOAuthState } from "../utils";
+
 const credentials = process.env.GOOGLE_API_CREDENTIALS!;
 const scopes = [
   "https://www.googleapis.com/auth/calendar.readonly",
@@ -20,8 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get token from Google Calendar API
-    const { client_secret, client_id, redirect_uris } = JSON.parse(credentials).web;
-    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+    const { client_secret, client_id } = JSON.parse(credentials).web;
+    const redirect_uri = process.env.BASE_URL + "/api/integrations/googlecalendar/callback";
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
 
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
@@ -31,6 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // setting the prompt to 'consent' will force this consent
       // every time, forcing a refresh_token to be returned.
       prompt: "consent",
+      state: encodeOAuthState(req),
     });
 
     res.status(200).json({ url: authUrl });

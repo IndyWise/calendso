@@ -1,7 +1,7 @@
-import { SchedulingType, Prisma, Credential } from "@prisma/client";
+import { Credential, Prisma, SchedulingType } from "@prisma/client";
 import async from "async";
 import dayjs from "dayjs";
-import dayjsBusinessDays from "dayjs-business-days";
+import dayjsBusinessTime from "dayjs-business-time";
 import isBetween from "dayjs/plugin/isBetween";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -13,14 +13,26 @@ import { handlePayment } from "@ee/lib/stripe/server";
 
 import { CalendarEvent, getBusyCalendarTimes } from "@lib/calendarClient";
 import EventOrganizerRequestMail from "@lib/emails/EventOrganizerRequestMail";
+import { getErrorFromUnknown } from "@lib/errors";
 import { getEventName } from "@lib/event";
-import EventManager, { CreateUpdateResult, EventResult, PartialReference } from "@lib/events/EventManager";
+import EventManager, { EventResult, PartialReference } from "@lib/events/EventManager";
 import logger from "@lib/logger";
 import prisma from "@lib/prisma";
 import { BookingCreateBody } from "@lib/types/booking";
 import { getBusyVideoTimes } from "@lib/videoClient";
+import sendPayload from "@lib/webhooks/sendPayload";
+import getSubscribers from "@lib/webhooks/subscriptions";
 
-dayjs.extend(dayjsBusinessDays);
+import { getTranslation } from "@server/lib/i18n";
+
+export interface DailyReturnType {
+  name: string;
+  url: string;
+  id: string;
+  created_at: string;
+}
+
+dayjs.extend(dayjsBusinessTime);
 dayjs.extend(utc);
 dayjs.extend(isBetween);
 dayjs.extend(timezone);
@@ -89,7 +101,7 @@ function isAvailable(busyTimes: BufferedBusyTimes, time: string, length: number)
 
 function isOutOfBounds(
   time: dayjs.ConfigType,
-  { periodType, periodDays, periodCountCalendarDays, periodStartDate, periodEndDate, timeZone }
+  { periodType, periodDays, periodCountCalendarDays, periodStartDate, periodEndDate, timeZone }: any // FIXME types
 ): boolean {
   const date = dayjs(time);
 
@@ -97,7 +109,7 @@ function isOutOfBounds(
     case "rolling": {
       const periodRollingEndDay = periodCountCalendarDays
         ? dayjs().tz(timeZone).add(periodDays, "days").endOf("day")
-        : dayjs().tz(timeZone).businessDaysAdd(periodDays, "days").endOf("day");
+        : dayjs().tz(timeZone).addBusinessTime(periodDays, "days").endOf("day");
       return date.endOf("day").isAfter(periodRollingEndDay);
     }
 
@@ -116,6 +128,7 @@ function isOutOfBounds(
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const reqBody = req.body as BookingCreateBody;
   const eventTypeId = reqBody.eventTypeId;
+  const t = await getTranslation(reqBody.language ?? "en", "common");
 
   log.debug(`Booking eventType ${eventTypeId} started`);
 
@@ -239,30 +252,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const teamMembers =
     eventType.schedulingType === SchedulingType.COLLECTIVE
       ? users.slice(1).map((user) => ({
-          email: user.email,
-          name: user.name,
+          email: user.email || "",
+          name: user.name || "",
           timeZone: user.timeZone,
         }))
       : [];
 
   const attendeesList = [...invitee, ...guests, ...teamMembers];
 
-  const seed = `${users[0].username}:${dayjs(reqBody.start).utc().format()}`;
+  const seed = `${users[0].username}:${dayjs(req.body.start).utc().format()}:${new Date().getTime()}`;
   const uid = translator.fromUUID(uuidv5(seed, uuidv5.URL));
+
+  const eventNameObject = {
+    attendeeName: reqBody.name || "Nameless",
+    eventType: eventType.title,
+    eventName: eventType.eventName,
+    host: users[0].name || "Nameless",
+    t,
+  };
 
   const evt: CalendarEvent = {
     type: eventType.title,
-    title: getEventName(reqBody.name, eventType.title, eventType.eventName),
+    title: getEventName(eventNameObject),
     description: reqBody.notes,
     startTime: reqBody.start,
     endTime: reqBody.end,
     organizer: {
-      name: users[0].name,
-      email: users[0].email,
+      name: users[0].name || "Nameless",
+      email: users[0].email || "Email-less",
       timeZone: users[0].timeZone,
     },
     attendees: attendeesList,
     location: reqBody.location, // Will be processed by the EventManager later.
+    language: t,
+    uid,
   };
 
   if (eventType.schedulingType === SchedulingType.COLLECTIVE) {
@@ -289,7 +312,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         startTime: dayjs(evt.startTime).toDate(),
         endTime: dayjs(evt.endTime).toDate(),
         description: evt.description,
-        confirmed: !eventType.requiresConfirmation || !!rescheduleUid,
+        confirmed: !eventType?.requiresConfirmation || !!rescheduleUid,
         location: evt.location,
         eventType: {
           connect: {
@@ -314,9 +337,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let booking: Booking | null = null;
   try {
     booking = await createBooking();
-  } catch (e) {
-    log.error(`Booking ${eventTypeId} failed`, "Error when saving booking to db", e.message);
-    if (e.code === "P2002") {
+    evt.uid = booking.uid;
+  } catch (_err) {
+    const err = getErrorFromUnknown(_err);
+    log.error(`Booking ${eventTypeId} failed`, "Error when saving booking to db", err.message);
+    if (err.code === "P2002") {
       res.status(409).json({ message: "booking.conflict" });
       return;
     }
@@ -328,6 +353,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let referencesToCreate: PartialReference[] = [];
   type User = Prisma.UserGetPayload<typeof userData>;
   let user: User | null = null;
+
   for (const currentUser of users) {
     if (!currentUser) {
       console.error(`currentUser not found`);
@@ -350,8 +376,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         selectedCalendars
       );
 
-      const videoBusyTimes = await getBusyVideoTimes(credentials);
-      calendarBusyTimes.push(...videoBusyTimes);
+      const videoBusyTimes = (await getBusyVideoTimes(credentials)).filter((time) => time);
+      calendarBusyTimes.push(...(videoBusyTimes as any[])); // FIXME add types
+      console.log("calendarBusyTimes==>>>", calendarBusyTimes);
 
       const bufferedBusyTimes: BufferedBusyTimes = calendarBusyTimes.map((a) => ({
         start: dayjs(a.start).subtract(currentUser.bufferTime, "minute").toString(),
@@ -404,12 +431,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
   }
+
+  if (!user) throw Error("Can't continue, user not found.");
+
   // After polling videoBusyTimes, credentials might have been changed due to refreshment, so query them again.
   const eventManager = new EventManager(await refreshCredentials(user.credentials));
 
   if (rescheduleUid) {
     // Use EventManager to conditionally use all needed integrations.
-    const updateResults: CreateUpdateResult = await eventManager.update(evt, rescheduleUid);
+    const updateResults = await eventManager.update(evt, rescheduleUid);
 
     results = updateResults.results;
     referencesToCreate = updateResults.referencesToCreate;
@@ -422,9 +452,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       log.error(`Booking ${user.name} failed`, error, results);
     }
+    // If it's not a reschedule, doesn't require confirmation and there's no price,
+    // Create a booking
   } else if (!eventType.requiresConfirmation && !eventType.price) {
     // Use EventManager to conditionally use all needed integrations.
-    const createResults: CreateUpdateResult = await eventManager.create(evt, uid);
+    const createResults = await eventManager.create(evt);
 
     results = createResults.results;
     referencesToCreate = createResults.referencesToCreate;
@@ -440,17 +472,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (eventType.requiresConfirmation && !rescheduleUid) {
-    await new EventOrganizerRequestMail(evt, uid).sendEmail();
+    await new EventOrganizerRequestMail(evt).sendEmail();
   }
 
   if (typeof eventType.price === "number" && eventType.price > 0) {
     try {
       const [firstStripeCredential] = user.credentials.filter((cred) => cred.type == "stripe_payment");
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      /* @ts-ignore https://github.com/prisma/prisma/issues/9389 */
       if (!booking.user) booking.user = user;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      /* @ts-ignore https://github.com/prisma/prisma/issues/9389 */
       const payment = await handlePayment(evt, eventType, firstStripeCredential, booking);
 
       res.status(201).json({ ...booking, message: "Payment required", paymentUid: payment.uid });
@@ -463,6 +491,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   log.debug(`Booking ${user.username} completed`);
+
+  const eventTrigger = rescheduleUid ? "BOOKING_RESCHEDULED" : "BOOKING_CREATED";
+  // Send Webhook call if hooked to BOOKING_CREATED & BOOKING_RESCHEDULED
+  const subscribers = await getSubscribers(user.id, eventTrigger);
+  console.log("evt:", evt);
+  const promises = subscribers.map((sub) =>
+    sendPayload(eventTrigger, new Date().toISOString(), sub.subscriberUrl, evt, sub.payloadTemplate).catch(
+      (e) => {
+        console.error(`Error executing webhook for event: ${eventTrigger}, URL: ${sub.subscriberUrl}`, e);
+      }
+    )
+  );
+  await Promise.all(promises);
 
   await prisma.booking.update({
     where: {

@@ -1,11 +1,12 @@
 import { ResetPasswordRequest } from "@prisma/client";
 import dayjs from "dayjs";
-import debounce from "lodash.debounce";
+import debounce from "lodash/debounce";
 import { GetServerSidePropsContext } from "next";
 import { getCsrfToken } from "next-auth/client";
 import Link from "next/link";
 import React, { useMemo } from "react";
 
+import { useLocale } from "@lib/hooks/useLocale";
 import prisma from "@lib/prisma";
 
 import { HeadSeo } from "@components/seo/head-seo";
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export default function Page({ resetPasswordRequest, csrfToken }: Props) {
+  const { t } = useLocale();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const [success, setSuccess] = React.useState(false);
@@ -46,7 +48,7 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
 
       return json;
     } catch (reason) {
-      setError({ message: "An unexpected error occurred. Try again." });
+      setError({ message: t("unexpected_error_try_again") });
     } finally {
       setLoading(false);
     }
@@ -77,15 +79,16 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
       <>
         <div className="space-y-6">
           <div>
-            <h2 className="font-cal mt-6 text-center text-3xl font-extrabold text-gray-900">Success</h2>
+            <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900 font-cal">
+              {t("success")}
+            </h2>
           </div>
-          <p>Your password has been reset. You can now login with your newly created password.</p>
+          <p>{t("password_has_been_reset_login")}</p>
           <Link href="/auth/login">
             <button
               type="button"
-              className="w-full flex justify-center py-2 px-4 text-sm font-medium text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-            >
-              Login
+              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+              {t("login")}
             </button>
           </Link>
         </div>
@@ -98,19 +101,15 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
       <>
         <div className="space-y-6">
           <div>
-            <h2 className="font-cal mt-6 text-center text-3xl font-extrabold text-gray-900">Whoops</h2>
-            <h2 className="text-center text-3xl font-extrabold text-gray-900">That Request is Expired.</h2>
+            <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900 font-cal">{t("whoops")}</h2>
+            <h2 className="text-3xl font-extrabold text-center text-gray-900">{t("request_is_expired")}</h2>
           </div>
-          <p>
-            That request is expired. You can back and enter the email associated with your account and we will
-            you another link to reset your password.
-          </p>
+          <p>{t("request_is_expired_instructions")}</p>
           <Link href="/auth/forgot-password">
             <button
               type="button"
-              className="w-full flex justify-center py-2 px-4 text-sm font-medium text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-            >
-              Try Again
+              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+              {t("try_again")}
             </button>
           </Link>
         </div>
@@ -124,25 +123,25 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
   }, [resetPasswordRequest]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <HeadSeo title="Reset Password" description="Change your password" />
+    <div className="flex flex-col justify-center min-h-screen py-12 bg-gray-50 sm:px-6 lg:px-8">
+      <HeadSeo title={t("reset_password")} description={t("change_your_password")} />
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 mx-2 shadow rounded-lg sm:px-10 space-y-6">
+        <div className="px-4 py-8 mx-2 space-y-6 bg-white rounded-lg shadow sm:px-10">
           {isRequestExpired && <Expired />}
           {!isRequestExpired && !success && (
             <>
               <div className="space-y-6">
-                <h2 className="font-cal mt-6 text-center text-3xl font-extrabold text-gray-900">
-                  Reset Password
+                <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900 font-cal">
+                  {t("reset_password")}
                 </h2>
-                <p>Enter the new password you&apos;d like for your account.</p>
+                <p>{t("enter_new_password")}</p>
                 {error && <p className="text-red-600">{error.message}</p>}
               </div>
               <form className="space-y-6" onSubmit={handleSubmit} action="#">
                 <input name="csrfToken" type="hidden" defaultValue={csrfToken} hidden />
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    New Password
+                    {t("new_password")}
                   </label>
                   <div className="mt-1">
                     <input
@@ -152,7 +151,7 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
                       type="password"
                       autoComplete="password"
                       required
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm"
+                      className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
                     />
                   </div>
                 </div>
@@ -167,7 +166,7 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
                   >
                     {loading && (
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -187,7 +186,7 @@ export default function Page({ resetPasswordRequest, csrfToken }: Props) {
                         ></path>
                       </svg>
                     )}
-                    Submit
+                    {t("submit")}
                   </button>
                 </div>
               </form>

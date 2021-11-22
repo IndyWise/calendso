@@ -3,7 +3,6 @@
     "node_modules{,/**}",
     ".vscode{,/**}"
   ],
-  "appService.defaultWebAppToDeploy": "/subscriptions/e89eba6c-9d97-48e3-91e5-5237cbebfd57/resourceGroups/calendso-resource/providers/Microsoft.Web/sites/calendso-indywise",
   "appService.deploySubpath": ".",
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.formatOnSave": true,
@@ -11,5 +10,9 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "eslint.run": "onSave"
+  "eslint.run": "onSave",
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#292929",
+    "titleBar.inactiveBackground": "#888888"
+  }
 }

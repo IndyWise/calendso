@@ -3,7 +3,9 @@ import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import toArray from "dayjs/plugin/toArray";
 import utc from "dayjs/plugin/utc";
-import { createEvent } from "ics";
+import { createEvent, DateArray } from "ics";
+
+import { Person } from "@lib/calendarClient";
 
 import EventMail from "./EventMail";
 import { stripHtml } from "./helpers";
@@ -18,23 +20,26 @@ export default class EventOrganizerMail extends EventMail {
    * Returns the instance's event as an iCal event in string representation.
    * @protected
    */
-  protected getiCalEventAsString(): string {
+  protected getiCalEventAsString(): string | undefined {
     const icsEvent = createEvent({
       start: dayjs(this.calEvent.startTime)
         .utc()
         .toArray()
         .slice(0, 6)
-        .map((v, i) => (i === 1 ? v + 1 : v)),
+        .map((v, i) => (i === 1 ? v + 1 : v)) as DateArray,
       startInputType: "utc",
       productId: "calendso/ics",
-      title: `${this.calEvent.type} with ${this.calEvent.attendees[0].name}`,
+      title: this.calEvent.language("organizer_ics_event_title", {
+        eventType: this.calEvent.type,
+        attendeeName: this.calEvent.attendees[0].name,
+      }),
       description:
         this.calEvent.description +
         stripHtml(this.getAdditionalBody()) +
         stripHtml(this.getAdditionalFooter()),
       duration: { minutes: dayjs(this.calEvent.endTime).diff(dayjs(this.calEvent.startTime), "minute") },
       organizer: { name: this.calEvent.organizer.name, email: this.calEvent.organizer.email },
-      attendees: this.calEvent.attendees.map((attendee: unknown) => ({
+      attendees: this.calEvent.attendees.map((attendee: Person) => ({
         name: attendee.name,
         email: attendee.email,
       })),
@@ -47,13 +52,15 @@ export default class EventOrganizerMail extends EventMail {
   }
 
   protected getBodyHeader(): string {
-    return "A new event has been scheduled.";
+    return this.calEvent.language("new_event_scheduled");
   }
 
   protected getAdditionalFooter(): string {
-    return `<p style="color: #4b5563; margin-top: 20px;">Need to make a change? <a href=${
-      process.env.BASE_URL + "/bookings"
-    } style="color: #161e2e;">Manage my bookings</a></p>`;
+    return `<p style="color: #4b5563; margin-top: 20px;">${this.calEvent.language(
+      "need_to_make_a_change"
+    )} <a href=${process.env.BASE_URL + "/bookings"} style="color: #161e2e;">${this.calEvent.language(
+      "manage_my_bookings"
+    )}</a></p>`;
   }
 
   protected getImage(): string {
@@ -103,27 +110,24 @@ export default class EventOrganizerMail extends EventMail {
         <col span="1" style="width: 60%;">
      </colgroup>
       <tr>
-        <td>What</td>
+        <td>${this.calEvent.language("what")}</td>
         <td>${this.calEvent.type}</td>
       </tr>
       <tr>
-        <td>When</td>
+        <td>${this.calEvent.language("when")}</td>
         <td>${this.getOrganizerStart().format("dddd, LL")}<br>${this.getOrganizerStart().format("h:mma")} (${
         this.calEvent.organizer.timeZone
       })</td>
       </tr>
       <tr>
-        <td>Who</td>
+        <td>${this.calEvent.language("who")}</td>
         <td>${this.calEvent.attendees[0].name}<br /><small><a href="mailto:${
         this.calEvent.attendees[0].email
       }">${this.calEvent.attendees[0].email}</a></small></td>
       </tr>
+      ${this.getLocation()}
       <tr>
-        <td>Where</td>
-        <td>${this.getLocation()}</td>
-      </tr>
-      <tr>
-        <td>Notes</td>
+        <td>${this.calEvent.language("notes")}</td>
         <td>${this.calEvent.description}</td>
       </tr>
     </table>
@@ -149,24 +153,47 @@ export default class EventOrganizerMail extends EventMail {
    * @protected
    */
   protected getLocation(): string {
-    if (this.additionInformation?.hangoutLink) {
-      return `<a href="${this.additionInformation?.hangoutLink}">${this.additionInformation?.hangoutLink}</a><br />`;
+    if (this.calEvent.additionInformation?.hangoutLink) {
+      return `<tr>
+      <td>${this.calEvent.language("where")}</td>
+      <td><a href="${this.calEvent.additionInformation?.hangoutLink}">${
+        this.calEvent.additionInformation?.hangoutLink
+      }</a><br /></td>
+      </tr>
+      `;
     }
 
-    if (this.additionInformation?.entryPoints && this.additionInformation?.entryPoints.length > 0) {
-      const locations = this.additionInformation?.entryPoints
+    if (
+      this.calEvent.additionInformation?.entryPoints &&
+      this.calEvent.additionInformation?.entryPoints.length > 0
+    ) {
+      const locations = this.calEvent.additionInformation?.entryPoints
         .map((entryPoint) => {
           return `
-          Join by ${entryPoint.entryPointType}: <br />
+          ${this.calEvent.language("join_by_entrypoint", { entryPoint: entryPoint.entryPointType })}: <br />
           <a href="${entryPoint.uri}">${entryPoint.label}</a> <br />
         `;
         })
         .join("<br />");
 
-      return `${locations}`;
+      return `<tr>
+      <td>${this.calEvent.language("where")}</td>
+      <td>${locations}</td>
+      </tr>
+      `;
     }
 
-    return this.calEvent.location ? `${this.calEvent.location}<br /><br />` : "";
+    if (!this.calEvent.location) {
+      return ``;
+    }
+
+    if (this.calEvent.location === "integrations:zoom" || this.calEvent.location === "integrations:daily") {
+      return ``;
+    }
+
+    return `<tr><td>${this.calEvent.language("where")}</td><td>${
+      this.calEvent.location
+    }<br /><br /></td></tr>`;
   }
 
   protected getAdditionalBody(): string {
@@ -202,12 +229,14 @@ export default class EventOrganizerMail extends EventMail {
   }
 
   protected getSubject(): string {
-    return `New event: ${this.calEvent.attendees[0].name} - ${this.getOrganizerStart().format(
-      "LT dddd, LL"
-    )} - ${this.calEvent.type}`;
+    return this.calEvent.language("new_event_subject", {
+      attendeeName: this.calEvent.attendees[0].name,
+      date: this.getOrganizerStart().format("LT dddd, LL"),
+      eventType: this.calEvent.type,
+    });
   }
 
-  protected printNodeMailerError(error: string): void {
+  protected printNodeMailerError(error: Error): void {
     console.error("SEND_NEW_EVENT_NOTIFICATION_ERROR", this.calEvent.organizer.email, error);
   }
 
