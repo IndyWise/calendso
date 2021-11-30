@@ -51,7 +51,8 @@ const PaymentPage: FC<PaymentPageProps> = (props) => {
                 className="inline-block px-8 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white border rounded-sm dark:bg-gray-800 border-neutral-200 dark:border-neutral-700 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:py-6"
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="modal-headline">
+                aria-labelledby="modal-headline"
+              >
                 <div>
                   <div className="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
                     <CreditCardIcon className="w-8 h-8 text-green-600" />

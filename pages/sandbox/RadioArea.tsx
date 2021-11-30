@@ -34,7 +34,8 @@ export default function RadioAreaPage() {
           <RadioArea.Group
             onChange={(radioGroup_1: string) => setFormData({ ...formData, radioGroup_1 })}
             className="flex space-x-4 max-w-screen-md"
-            name="radioGroup_1">
+            name="radioGroup_1"
+          >
             <RadioArea.Item value="radioGroup_1_radio_1" className="flex-grow bg-white">
               <strong className="mb-1">radioGroup_1_radio_1</strong>
               <p>Description #1</p>
@@ -51,7 +52,8 @@ export default function RadioAreaPage() {
           <RadioArea.Group
             onChange={(radioGroup_2: string) => setFormData({ ...formData, radioGroup_2 })}
             className="flex space-x-4 max-w-screen-md"
-            name="radioGroup_2">
+            name="radioGroup_2"
+          >
             <RadioArea.Item value="radioGroup_2_radio_1" className="flex-grow bg-white">
               <strong className="mb-1">radioGroup_1_radio_1</strong>
               <p>Description #1</p>
@@ -74,7 +76,8 @@ export default function RadioAreaPage() {
             <RadioArea.Select
               className="max-w-screen-md"
               options={[]}
-              placeholder="Does the rabbit or the turtle win the race?"></RadioArea.Select>
+              placeholder="Does the rabbit or the turtle win the race?"
+            ></RadioArea.Select>
           </div>
           <div>
             <p className="text-lg">RadioArea with options</p>
@@ -85,7 +88,8 @@ export default function RadioAreaPage() {
                 setFormData({ ...formData, turtleOrRabbitWinsTheRace })
               }
               options={selectOptions}
-              placeholder="Does the rabbit or the turtle win the race?"></RadioArea.Select>
+              placeholder="Does the rabbit or the turtle win the race?"
+            ></RadioArea.Select>
           </div>
 
           <div>
@@ -94,7 +98,8 @@ export default function RadioAreaPage() {
               disabled={true}
               className="max-w-screen-md"
               value="turtle"
-              options={selectOptions}></RadioArea.Select>
+              options={selectOptions}
+            ></RadioArea.Select>
           </div>
         </form>
         <pre>{JSON.stringify(formData)}</pre>

@@ -214,7 +214,8 @@ export default function Shell(props: {
                             ? "bg-neutral-100 text-neutral-900"
                             : "text-neutral-500 hover:bg-gray-50 hover:text-neutral-900",
                           "group flex items-center px-2 py-2 text-sm font-medium rounded-sm"
-                        )}>
+                        )}
+                      >
                         <item.icon
                           className={classNames(
                             item.current
@@ -284,7 +285,8 @@ export default function Shell(props: {
                           itemIdx === navigation.length - 1 ? "rounded-r-lg" : "",
                           "group relative min-w-0 flex-1 overflow-hidden bg-white py-2 px-2 text-xs sm:text-sm font-medium text-center hover:bg-gray-50 focus:z-10"
                         )}
-                        aria-current={item.current ? "page" : undefined}>
+                        aria-current={item.current ? "page" : undefined}
+                      >
                         <item.icon
                           className={classNames(
                             item.current ? "text-gray-900" : "text-gray-400 group-hover:text-gray-500",

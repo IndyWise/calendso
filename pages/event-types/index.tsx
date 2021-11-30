@@ -1,13 +1,20 @@
 // TODO: replace headlessui with radix-ui
 import { Menu, Transition } from "@headlessui/react";
-import { UsersIcon } from "@heroicons/react/solid";
-import { ChevronDownIcon, PlusIcon } from "@heroicons/react/solid";
-import { DotsHorizontalIcon, ExternalLinkIcon, LinkIcon } from "@heroicons/react/solid";
+import {
+  DotsHorizontalIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+  ArrowDownIcon,
+  ChevronDownIcon,
+  PlusIcon,
+  ArrowUpIcon,
+  UsersIcon,
+} from "@heroicons/react/solid";
 import { SchedulingType } from "@prisma/client";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { Fragment, useRef } from "react";
+import React, { Fragment, useRef, useState, useEffect } from "react";
 import { useMutation } from "react-query";
 
 import { QueryCell } from "@lib/QueryCell";
@@ -72,10 +79,40 @@ interface EventTypeListProps {
 }
 const EventTypeList = ({ readOnly, types, profile }: EventTypeListProps): JSX.Element => {
   const { t } = useLocale();
+
+  const utils = trpc.useContext();
+  const mutation = trpc.useMutation("viewer.eventTypeOrder", {
+    onError: (err) => {
+      console.error(err.message);
+    },
+    async onSettled() {
+      await utils.cancelQuery(["viewer.eventTypes"]);
+      await utils.invalidateQueries(["viewer.eventTypes"]);
+    },
+  });
+  const [sortableTypes, setSortableTypes] = useState(types);
+  useEffect(() => {
+    setSortableTypes(types);
+  }, [types]);
+  function moveEventType(index: number, increment: 1 | -1) {
+    const newList = [...sortableTypes];
+
+    const type = sortableTypes[index];
+    const tmp = sortableTypes[index + increment];
+    if (tmp) {
+      newList[index] = tmp;
+      newList[index + increment] = type;
+    }
+    setSortableTypes(newList);
+    mutation.mutate({
+      ids: newList.map((type) => type.id),
+    });
+  }
+
   return (
     <div className="mb-16 -mx-4 overflow-hidden bg-white border border-gray-200 rounded-sm sm:mx-0">
       <ul className="divide-y divide-neutral-200" data-testid="event-types">
-        {types.map((type) => (
+        {sortableTypes.map((type, index) => (
           <li
             key={type.id}
             className={classNames(
@@ -175,7 +212,8 @@ const EventTypeList = ({ readOnly, types, profile }: EventTypeListProps): JSX.El
                         enterTo="transform opacity-100 scale-100"
                         leave="transition ease-in duration-75"
                         leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95">
+                        leaveTo="transform opacity-0 scale-95"
+                      >
                         <Menu.Items
                           static
                           className="absolute right-0 z-10 w-56 mt-2 origin-top-right bg-white divide-y rounded-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none divide-neutral-100">
@@ -189,7 +227,8 @@ const EventTypeList = ({ readOnly, types, profile }: EventTypeListProps): JSX.El
                                   className={classNames(
                                     active ? "bg-neutral-100 text-neutral-900" : "text-neutral-700",
                                     "group flex items-center px-4 py-2 text-sm font-medium"
-                                  )}>
+                                  )}
+                                >
                                   <ExternalLinkIcon
                                     className="w-4 h-4 mr-3 text-neutral-400 group-hover:text-neutral-500"
                                     aria-hidden="true"
@@ -210,7 +249,8 @@ const EventTypeList = ({ readOnly, types, profile }: EventTypeListProps): JSX.El
                                   className={classNames(
                                     active ? "bg-neutral-100 text-neutral-900" : "text-neutral-700",
                                     "group flex items-center px-4 py-2 text-sm w-full font-medium"
-                                  )}>
+                                  )}
+                                >
                                   <LinkIcon
                                     className="w-4 h-4 mr-3 text-neutral-400 group-hover:text-neutral-500"
                                     aria-hidden="true"
@@ -313,7 +353,7 @@ const EventTypesPage = () => {
                       </a>
                     </>
                   }
-                  className="my-4"
+                  className="mb-4"
                 />
               )}
               {data.eventTypeGroups &&
@@ -369,7 +409,8 @@ const CreateNewEventButton = ({ profiles, canAddEvents }: CreateEventTypeProps) 
       open={modalOpen.isOn}
       onOpenChange={(isOpen) => {
         router.push(isOpen ? modalOpen.hrefOn : modalOpen.hrefOff);
-      }}>
+      }}
+    >
       {!profiles.filter((profile) => profile.teamId).length && (
         <Button
           data-testid="new-event-type"
@@ -449,7 +490,8 @@ const CreateNewEventButton = ({ profiles, canAddEvents }: CreateEventTypeProps) 
             }
 
             createMutation.mutate(payload);
-          }}>
+          }}
+        >
           <div>
             <div className="mb-4">
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">
@@ -532,7 +574,8 @@ const CreateNewEventButton = ({ profiles, canAddEvents }: CreateEventTypeProps) 
               </label>
               <RadioArea.Group
                 name="schedulingType"
-                className="relative flex mt-1 space-x-6 rounded-sm shadow-sm">
+                className="relative flex mt-1 space-x-6 rounded-sm shadow-sm"
+              >
                 <RadioArea.Item value={SchedulingType.COLLECTIVE} className="w-1/2 text-sm">
                   <strong className="block mb-1">{t("collective")}</strong>
                   <p>{t("collective_description")}</p>

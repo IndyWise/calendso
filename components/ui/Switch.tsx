@@ -25,7 +25,8 @@ export default function Switch(props: SwitchProps) {
         className={classNames(checked ? "bg-gray-900" : "bg-gray-400", "rounded-sm w-[36px] p-0.5 h-[20px]")}
         checked={checked}
         onCheckedChange={onPrimitiveCheckedChange}
-        {...primitiveProps}>
+        {...primitiveProps}
+      >
         <PrimitiveSwitch.Thumb
           id={id}
           className={classNames(

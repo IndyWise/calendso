@@ -125,7 +125,8 @@ export default function TeamListItem(props: {
                       color="minimal"
                       className="w-full"
                       onClick={() => props.onActionSelect("edit")}
-                      StartIcon={PencilAltIcon}>
+                      StartIcon={PencilAltIcon}
+                    >
                       {" "}
                       {t("edit_team")}
                     </Button>

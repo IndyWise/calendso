@@ -34,7 +34,8 @@ export const Select = function RadioAreaSelect(props: RadioAreaSelectProps) {
         className={classNames(
           "mb-1 cursor-pointer focus:ring-primary-500 text-left border border-1 bg-white p-2 shadow-sm block w-full sm:text-sm border-gray-300 rounded-sm",
           disabled && "focus:ring-0 cursor-default bg-gray-200 "
-        )}>
+        )}
+      >
         {getLabel(props.value) ?? placeholder}
         <ChevronDownIcon className="float-right h-5 w-5 text-neutral-500" />
       </CollapsibleTrigger>

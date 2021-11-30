@@ -50,7 +50,7 @@ export default function User(props: inferSSRProps<typeof getServerSideProps>) {
                   className="relative bg-white border rounded-sm group dark:bg-neutral-900 dark:border-0 dark:hover:border-neutral-600 hover:bg-gray-50 border-neutral-200 hover:border-brand">
                   <ArrowRightIcon className="absolute w-4 h-4 text-black transition-opacity opacity-0 right-3 top-3 dark:text-white group-hover:opacity-100" />
                   <Link href={`/${user.username}/${type.slug}`}>
-                    <a className="block px-6 py-4">
+                    <a className="block px-6 py-4" data-testid="event-type-link">
                       <h2 className="font-semibold text-neutral-900 dark:text-white">{type.title}</h2>
                       <EventTypeDescription eventType={type} />
                     </a>
@@ -124,6 +124,14 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
         },
       ],
     },
+    orderBy: [
+      {
+        position: "desc",
+      },
+      {
+        id: "asc",
+      },
+    ],
     select: {
       id: true,
       slug: true,

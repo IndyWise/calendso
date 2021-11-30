@@ -1,13 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
 /.yarn
-
 # testing
 /coverage
 .nyc_output
@@ -20,11 +18,9 @@ playwright/screenshots
 
 # production
 /build
-/dist
 
 # misc
 .DS_Store
-Thumbs.db
 *.pem
 
 # debug

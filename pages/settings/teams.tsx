@@ -101,7 +101,8 @@ export default function Teams() {
                   <Button
                     type="button"
                     onClick={() => setShowCreateTeamModal(true)}
-                    className="btn btn-white">
+                    className="btn btn-white"
+                  >
                     <PlusIcon className="group-hover:text-black text-gray-700 w-3.5 h-3.5 mr-2 inline-block" />
                     {t("new_team")}
                   </Button>
@@ -121,7 +122,8 @@ export default function Teams() {
                           onChange={loadData}
                           key={team.id}
                           team={team}
-                          onActionSelect={noop}></TeamListItem>
+                          onActionSelect={noop}
+                        ></TeamListItem>
                       ))}
                     </ul>
                   </div>
@@ -136,11 +138,13 @@ export default function Teams() {
             className="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-title"
             role="dialog"
-            aria-modal="true">
+            aria-modal="true"
+          >
             <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 z-0 transition-opacity bg-gray-500 bg-opacity-75"
-                aria-hidden="true"></div>
+                aria-hidden="true"
+              ></div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
                 &#8203;

@@ -9,6 +9,7 @@ import { useLocale } from "@lib/hooks/useLocale";
 import prisma from "@lib/prisma";
 import { collectPageParameters, telemetryEventTypes, useTelemetry } from "@lib/telemetry";
 
+import CustomBranding from "@components/CustomBranding";
 import { HeadSeo } from "@components/seo/head-seo";
 import { Button } from "@components/ui/Button";
 
@@ -64,6 +65,7 @@ export default function Type(props) {
         title={`${t("cancel")} ${props.booking && props.booking.title} | ${props.profile.name}`}
         description={`${t("cancel")} ${props.booking && props.booking.title} | ${props.profile.name}`}
       />
+      <CustomBranding val={props.profile.brandColor} />
       <main className="max-w-3xl mx-auto my-24">
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -75,7 +77,8 @@ export default function Type(props) {
                 className="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6"
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="modal-headline">
+                aria-labelledby="modal-headline"
+              >
                 {error && (
                   <div>
                     <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
@@ -159,6 +162,7 @@ export async function getServerSideProps(context) {
           id: true,
           username: true,
           name: true,
+          brandColor: true,
         },
       },
       eventType: {

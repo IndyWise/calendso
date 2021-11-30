@@ -20,13 +20,15 @@ export function Tooltip({
       delayDuration={150}
       open={open}
       defaultOpen={defaultOpen}
-      onOpenChange={onOpenChange}>
+      onOpenChange={onOpenChange}
+    >
       <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
       <TooltipPrimitive.Content
         className="bg-brand text-xs -mt-2 text-white px-1 py-0.5 shadow-lg rounded-sm"
         side="top"
         align="center"
-        {...props}>
+        {...props}
+      >
         {content}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Root>

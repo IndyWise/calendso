@@ -259,7 +259,8 @@ export default function EditTeam(props: { team: Team | undefined | null; onClose
                         onClick={(e) => {
                           e.stopPropagation();
                         }}
-                        className="btn-sm btn-white">
+                        className="btn-sm btn-white"
+                      >
                         <TrashIcon className="group-hover:text-red text-gray-700 w-3.5 h-3.5 mr-2 inline-block" />
                         {t("disband_team")}
                       </DialogTrigger>

@@ -6,7 +6,8 @@ function UserCalendarIllustration() {
       className="w-1/2 md:w-32 mx-auto block mb-4"
       viewBox="0 0 132 132"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg">
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <rect
         x="1.48387"
         y="1.48387"
@@ -189,7 +190,8 @@ function UserCalendarIllustration() {
           width="121.001"
           height="88.3916"
           filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB">
+          colorInterpolationFilters="sRGB"
+        >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"

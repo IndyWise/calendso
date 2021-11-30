@@ -33,7 +33,8 @@ export default function TeamList(props: {
             onChange={props.onChange}
             key={team.id}
             team={team}
-            onActionSelect={(action: string) => selectAction(action, team)}></TeamListItem>
+            onActionSelect={(action: string) => selectAction(action, team)}
+          ></TeamListItem>
         ))}
       </ul>
     </div>

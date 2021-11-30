@@ -14,7 +14,8 @@ const RadioArea = (props: RadioAreaProps) => {
         "block border border-1 p-4 focus:outline-none focus:ring focus:ring-neutral-500",
         props.checked && "border-brand",
         props.className
-      )}>
+      )}
+    >
       <input
         onChange={(e) => {
           if (typeof props.onChange === "function") {

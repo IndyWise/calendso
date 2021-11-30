@@ -1,4 +1,3 @@
-import appInsights from "applicationinsights";
 import { createServer } from "http";
 import next from "next";
 
@@ -14,3 +13,4 @@ app.prepare().then(() => {
     if (err) throw err;
     console.log(`> Ready on <http://localhost>:${port}`);
   });
+});

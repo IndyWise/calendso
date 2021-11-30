@@ -46,6 +46,7 @@ import prisma from "@lib/prisma";
 import { defaultAvatarSrc } from "@lib/profile";
 import { AdvancedOptions, EventTypeInput } from "@lib/types/event-type";
 import { inferSSRProps } from "@lib/types/inferSSRProps";
+import { WorkingHours } from "@lib/types/schedule";
 
 import { Dialog, DialogContent, DialogTrigger } from "@components/Dialog";
 import Shell from "@components/Shell";
@@ -112,7 +113,10 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
 
   const [users, setUsers] = useState<AdvancedOptions["users"]>([]);
   const [editIcon, setEditIcon] = useState(true);
-  const [enteredAvailability, setEnteredAvailability] = useState();
+  const [enteredAvailability, setEnteredAvailability] = useState<{
+    openingHours: WorkingHours[];
+    dateOverrides: WorkingHours[];
+  }>();
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [selectedTimeZone, setSelectedTimeZone] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<OptionTypeBase | undefined>(undefined);
@@ -427,7 +431,8 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
                                       className="w-6 h-6"
                                       viewBox="0 0 64 54"
                                       fill="none"
-                                      xmlns="http://www.w3.org/2000/svg">
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
                                       <path d="M16 0V16H0" fill="#EA4335" />
                                       <path
                                         d="M16 0V16H37.3333V27.0222L53.3333 14.0444V5.33332C53.3333 1.77777 51.5555 0 47.9999 0"
@@ -503,7 +508,8 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
                                       className="w-6 h-6"
                                       viewBox="0 0 64 64"
                                       fill="none"
-                                      xmlns="http://www.w3.org/2000/svg">
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
                                       <path
                                         d="M32 0C49.6733 0 64 14.3267 64 32C64 49.6733 49.6733 64 32 64C14.3267 64 0 49.6733 0 32C0 14.3267 14.3267 0 32 0Z"
                                         fill="#E5E5E4"
@@ -770,7 +776,8 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
                                         checked ? "border-secondary-200 z-10" : "border-gray-200",
                                         "relative min-h-12 flex items-center cursor-pointer focus:outline-none"
                                       )
-                                    }>
+                                    }
+                                  >
                                     {({ active, checked }) => (
                                       <>
                                         <div
@@ -781,7 +788,8 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
                                             active ? "ring-2 ring-offset-2 ring-primary-500" : "",
                                             "h-4 w-4 mt-0.5 mr-2 cursor-pointer rounded-full border items-center justify-center"
                                           )}
-                                          aria-hidden="true">
+                                          aria-hidden="true"
+                                        >
                                           <span className="rounded-full bg-white w-1.5 h-1.5" />
                                         </div>
                                         <div className="flex flex-col lg:ml-3">
@@ -851,7 +859,11 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
                               setAvailability={setEnteredAvailability}
                               setTimeZone={setSelectedTimeZone}
                               timeZone={selectedTimeZone}
-                              availability={availability}
+                              availability={availability.map((schedule) => ({
+                                ...schedule,
+                                startTime: new Date(schedule.startTime),
+                                endTime: new Date(schedule.endTime),
+                              }))}
                             />
                           </div>
                         </div>
@@ -1000,11 +1012,13 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
             className="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-title"
             role="dialog"
-            aria-modal="true">
+            aria-modal="true"
+          >
             <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 z-0 transition-opacity bg-gray-500 bg-opacity-75"
-                aria-hidden="true"></div>
+                aria-hidden="true"
+              ></div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
                 &#8203;
@@ -1253,7 +1267,14 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   }
 
   type Availability = typeof eventType["availability"];
-  const getAvailability = (availability: Availability) => (availability?.length ? availability : null);
+  const getAvailability = (availability: Availability) =>
+    availability?.length
+      ? availability.map((schedule) => ({
+          ...schedule,
+          startTime: new Date(new Date().toDateString() + " " + schedule.startTime.toTimeString()).valueOf(),
+          endTime: new Date(new Date().toDateString() + " " + schedule.endTime.toTimeString()).valueOf(),
+        }))
+      : null;
 
   const availability = getAvailability(eventType.availability) || [];
   availability.sort((a, b) => a.startTime - b.startTime);
@@ -1261,6 +1282,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   const eventTypeObject = Object.assign({}, eventType, {
     periodStartDate: eventType.periodStartDate?.toString() ?? null,
     periodEndDate: eventType.periodEndDate?.toString() ?? null,
+    availability,
   });
 
   const teamMembers = eventTypeObject.team
