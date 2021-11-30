@@ -17,7 +17,7 @@
     "test-codegen": "yarn playwright codegen http://localhost:8080",
     "type-check": "tsc --pretty --noEmit",
     "build": "next build",
-    "start": "node server.js",
+    "start": "next start -p ${PORT}",
     "ts-node": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\"",
     "postinstall": "prisma generate",
     "pre-commit": "lint-staged",
@@ -26,11 +26,10 @@
     "check-changed-files": "yarn ts-node scripts/ts-check-changed-files.ts"
   },
   "engines": {
-    "node": "14.x",
+    "node": ">=14.x",
     "yarn": ">=1.19.0 < 2.0.0"
   },
   "dependencies": {
-    "@microsoft/applicationinsights-web": "^2.7.0",
     "@daily-co/daily-js": "^0.21.0",
     "@headlessui/react": "^1.4.1",
     "@heroicons/react": "^1.0.5",
@@ -55,7 +54,6 @@
     "@trpc/server": "^9.12.0",
     "@vercel/edge-functions-ui": "^0.2.1",
     "@wojtekmaj/react-daterange-picker": "^3.3.1",
-    "applicationinsights": "^2.1.6",
     "accept-language-parser": "^1.5.0",
     "async": "^3.2.1",
     "bcryptjs": "^2.4.3",
@@ -87,14 +85,13 @@
     "react-phone-number-input": "^3.1.25",
     "react-query": "^3.30.0",
     "react-router-dom": "^5.2.0",
-    "react-select": "^4.3.1",
+    "react-select": "^5.1.0",
     "react-timezone-select": "^1.1.13",
     "react-use-intercom": "1.4.0",
     "short-uuid": "^4.2.0",
     "stripe": "^8.168.0",
     "superjson": "1.8.0",
     "tsdav": "1.0.6",
-    "tslib": "^2.3.1",
     "tslog": "^3.2.1",
     "uuid": "^8.3.2",
     "zod": "^3.8.2"
@@ -113,7 +110,6 @@
     "@types/qrcode": "^1.4.1",
     "@types/react": "^17.0.18",
     "@types/react-phone-number-input": "^3.0.13",
-    "@types/react-select": "^4.0.17",
     "@types/stripe": "^8.0.417",
     "@types/uuid": "8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.33.0",

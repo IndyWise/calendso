@@ -23,6 +23,7 @@ import { useLocale } from "@lib/hooks/useLocale";
 import { collectPageParameters, telemetryEventTypes, useTelemetry } from "@lib/telemetry";
 import { trpc } from "@lib/trpc";
 
+import CustomBranding from "@components/CustomBranding";
 import Loader from "@components/Loader";
 import { HeadSeo } from "@components/seo/head-seo";
 import Avatar from "@components/ui/Avatar";
@@ -166,6 +167,9 @@ export default function Shell(props: {
 
   const pageTitle = typeof props.heading === "string" ? props.heading : props.title;
 
+  const query = useMeQuery();
+  const user = query.data;
+
   const i18n = useViewerI18n();
 
   if (i18n.status === "loading" || isRedirectingToOnboarding || loading) {
@@ -178,6 +182,7 @@ export default function Shell(props: {
   }
   return (
     <>
+      <CustomBranding val={user?.brandColor} />
       <HeadSeo
         title={pageTitle ?? "Cal.com"}
         description={props.subtitle ? props.subtitle?.toString() : ""}
@@ -255,7 +260,7 @@ export default function Shell(props: {
             </nav>
             <div className={classNames(props.centered && "md:max-w-5xl mx-auto", "py-8")}>
               <div className="block sm:flex justify-between px-4 sm:px-6 md:px-8 min-h-[80px]">
-                <div className="w-full mb-10">
+                <div className="w-full mb-8">
                   <h1 className="mb-1 text-xl font-bold tracking-wide text-gray-900 font-cal">
                     {props.heading}
                   </h1>
@@ -309,13 +314,13 @@ function UserDropdown({ small }: { small?: boolean }) {
   const query = useMeQuery();
   const user = query.data;
 
-  return user ? (
+  return (
     <Dropdown>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center space-x-2 cursor-pointer group">
           <Avatar
-            imageSrc={user.avatar}
-            alt={user.username}
+            imageSrc={user?.avatar || ""}
+            alt={user?.username || "Nameless User"}
             className={classNames(small ? "w-8 h-8" : "w-10 h-10", "bg-gray-300 rounded-full flex-shrink-0")}
           />
           {!small && (
@@ -337,15 +342,17 @@ function UserDropdown({ small }: { small?: boolean }) {
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`${process.env.NEXT_PUBLIC_APP_URL}/${user?.username || ""}`}
-            className="flex items-center px-4 py-2 text-sm text-gray-700">
-            <ExternalLinkIcon className="w-5 h-5 mr-3 text-gray-500" /> {t("view_public_page")}
-          </a>
-        </DropdownMenuItem>
+        {user?.username && (
+          <DropdownMenuItem>
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`${process.env.NEXT_PUBLIC_APP_URL}/${user.username}`}
+              className="flex items-center px-4 py-2 text-sm text-gray-700">
+              <ExternalLinkIcon className="w-5 h-5 mr-3 text-gray-500" /> {t("view_public_page")}
+            </a>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator className="h-px bg-gray-200" />
         <DropdownMenuItem>
           <a
