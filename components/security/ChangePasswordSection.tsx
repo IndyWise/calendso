@@ -55,7 +55,7 @@ const ChangePasswordSection = () => {
   return (
     <>
       <div className="mt-6">
-        <h2 className="font-cal text-lg leading-6 font-medium text-gray-900">{t("change_password")}</h2>
+        <h2 className="text-lg font-medium leading-6 text-gray-900 font-cal">{t("change_password")}</h2>
       </div>
       <form className="divide-y divide-gray-200 lg:col-span-9" onSubmit={changePasswordHandler}>
         <div className="py-6 lg:pb-8">
@@ -72,7 +72,7 @@ const ChangePasswordSection = () => {
                   name="current_password"
                   id="current_password"
                   required
-                  className="shadow-sm focus:ring-black focus:border-brand block w-full sm:text-sm border-gray-300 rounded-sm"
+                  className="block w-full border-gray-300 rounded-sm shadow-sm focus:ring-black focus:border-brand sm:text-sm"
                   placeholder={t("your_old_password")}
                 />
               </div>
@@ -89,17 +89,17 @@ const ChangePasswordSection = () => {
                   value={newPassword}
                   required
                   onInput={(e) => setNewPassword(e.currentTarget.value)}
-                  className="shadow-sm focus:ring-black focus:border-brand block w-full sm:text-sm border-gray-300 rounded-sm"
+                  className="block w-full border-gray-300 rounded-sm shadow-sm focus:ring-black focus:border-brand sm:text-sm"
                   placeholder={t("super_secure_new_password")}
                 />
               </div>
             </div>
           </div>
           {errorMessage && <p className="mt-1 text-sm text-red-700">{errorMessage}</p>}
-          <div className="py-8 flex justify-end">
+          <div className="flex justify-end py-8">
             <button
               type="submit"
-              className="ml-2 bg-neutral-900 border border-transparent rounded-sm shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+              className="inline-flex justify-center px-4 py-2 ml-2 text-sm font-medium text-white border border-transparent rounded-sm shadow-sm bg-neutral-900 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
               {t("save")}
             </button>
           </div>

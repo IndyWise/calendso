@@ -221,7 +221,8 @@ const SchedulerForm = ({ schedule = DEFAULT_SCHEDULE, onSubmit }: Props) => {
         TIMES.map((time) => (
           <option
             key={`${day}.${index}.${type}.${time.format(_24_HOUR_TIME_FORMAT)}`}
-            value={time.format(_24_HOUR_TIME_FORMAT)}>
+            value={time.format(_24_HOUR_TIME_FORMAT)}
+          >
             {time.toDate().toLocaleTimeString(undefined, { minute: "numeric", hour: "numeric" })}
           </option>
         ));
@@ -233,7 +234,8 @@ const SchedulerForm = ({ schedule = DEFAULT_SCHEDULE, onSubmit }: Props) => {
               name={`${day}.${index}.start`}
               defaultValue={range?.start || DEFAULT_START_TIME}
               onChange={handleSelectRangeChange}
-              className="block px-4 pr-8 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-sm">
+              className="block px-4 pr-8 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-sm"
+            >
               {timeOptions("start")}
             </select>
             <Text>-</Text>
@@ -242,7 +244,8 @@ const SchedulerForm = ({ schedule = DEFAULT_SCHEDULE, onSubmit }: Props) => {
               name={`${day}.${index}.end`}
               defaultValue={range?.end || DEFAULT_END_TIME}
               onChange={handleSelectRangeChange}
-              className=" block px-4 pr-8 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-sm">
+              className=" block px-4 pr-8 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-sm"
+            >
               {timeOptions("end")}
             </select>
           </div>
@@ -277,7 +280,8 @@ const SchedulerForm = ({ schedule = DEFAULT_SCHEDULE, onSubmit }: Props) => {
           className={classnames(
             "flex flex-col space-y-6 sm:space-y-0 sm:flex-row  sm:justify-between",
             ranges && ranges?.length > 1 ? "sm:items-start" : "sm:items-center"
-          )}>
+          )}
+        >
           <div style={{ minWidth: "33%" }} className="flex items-center justify-between">
             <div className="flex items-center space-x-2 ">
               <input

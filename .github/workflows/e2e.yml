@@ -6,29 +6,14 @@ jobs:
     name: ${{ matrix.node }} and ${{ matrix.os }}
 
     env:
-      DATABASE_URL: postgresql://calendsoPostgres@calendso-prod:%23indywise123@calendso-prod.postgres.database.azure.com:5432/postgres
-      NODE_ENV: test
-      BASE_URL: https://calendso-prod.azurewebsites.net
-      GOOGLE_API_CREDENTIALS:
-        {
-          "web":
-            {
-              "client_id": "20957776680-kriiokf2iud4sg036ebro9ek02fvir3g.apps.googleusercontent.com",
-              "project_id": "sacred-lane-322616",
-              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-              "token_uri": "https://oauth2.googleapis.com/token",
-              "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-              "client_secret": "wXqyswgifZhTYnk4neHIJjhT",
-              "redirect_uris":
-                [
-                  "https://calendso-prod.azurewebsites.net/api/integrations/googlecalendar/callback",
-                  "https://calendso-dev.azurewebsites.net/api/integrations/googlecalendar/callback",
-                ],
-            },
-        }
+      DATABASE_URL: postgresql://postgres:@localhost:5432/calendso
+      BASE_URL: http://localhost:8080
+      JWT_SECRET: secret
+      GOOGLE_API_CREDENTIALS: "{}"
+      # GOOGLE_API_CREDENTIALS: ${{ secrets.CI_GOOGLE_API_CREDENTIALS }}
       # CRON_API_KEY: xxx
       # CALENDSO_ENCRYPTION_KEY: xxx
-      NEXTAUTH_URL: https://calendso-prod.azurewebsites.net
+      NEXTAUTH_URL: http://localhost:8080
       # EMAIL_FROM: xxx
       # EMAIL_SERVER_HOST: xxx
       # EMAIL_SERVER_PORT: xxx
@@ -73,7 +58,7 @@ jobs:
       - run: yarn db-seed
       - run: yarn build
       - run: yarn start &
-      - run: npx wait-port 3000 --timeout 10000
+      - run: npx wait-port 8080 --timeout 10000
 
       - name: Cache playwright binaries
         uses: actions/cache@v2

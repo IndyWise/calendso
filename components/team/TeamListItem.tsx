@@ -115,7 +115,7 @@ export default function TeamListItem(props: {
                 />
               </Tooltip>
               <Dropdown>
-                <DropdownMenuTrigger className="group w-10 h-10 p-0 border border-transparent text-neutral-400 hover:border-gray-200">
+                <DropdownMenuTrigger className="w-10 h-10 p-0 border border-transparent group text-neutral-400 hover:border-gray-200">
                   <DotsHorizontalIcon className="w-5 h-5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>

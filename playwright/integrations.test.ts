@@ -39,7 +39,7 @@ describe("webhooks", () => {
     const tomorrow = dayjs().add(1, "day");
     const tomorrowFormatted = tomorrow.format("YYYY-MM-DDZZ");
 
-    await page.goto(`http://localhost:3000/pro/30min?date=${encodeURIComponent(tomorrowFormatted)}`);
+    await page.goto(`http://localhost:8080/pro/30min?date=${encodeURIComponent(tomorrowFormatted)}`);
 
     // click first time available
     await page.click("[data-testid=time]");

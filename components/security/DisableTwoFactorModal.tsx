@@ -59,7 +59,7 @@ const DisableTwoFactorAuthModal = ({ onDisable, onCancel }: DisableTwoFactorAuth
 
         <form onSubmit={handleDisable}>
           <div className="mb-4">
-            <label htmlFor="password" className="mt-4 block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block mt-4 text-sm font-medium text-gray-700">
               {t("password")}
             </label>
             <div className="mt-1">

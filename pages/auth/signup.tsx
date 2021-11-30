@@ -54,19 +54,19 @@ export default function Signup(props) {
 
   return (
     <div
-      className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8"
+      className="flex flex-col justify-center min-h-screen py-12 bg-gray-50 sm:px-6 lg:px-8"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true">
       <HeadSeo title={t("sign_up")} description={t("sign_up")} />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="font-cal text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="text-3xl font-extrabold text-center text-gray-900 font-cal">
           {t("create_your_account")}
         </h2>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow mx-2 sm:rounded-lg sm:px-10">
-          <form method="POST" onSubmit={signUp} className="bg-white space-y-6">
+        <div className="px-4 py-8 mx-2 bg-white shadow sm:rounded-lg sm:px-10">
+          <form method="POST" onSubmit={signUp} className="space-y-6 bg-white">
             {hasErrors && <ErrorAlert message={errorMessage} />}
             <div>
               <div className="mb-2">
@@ -85,7 +85,7 @@ export default function Signup(props) {
                   disabled={!!props.email}
                   readOnly={!!props.email}
                   value={props.email}
-                  className="bg-gray-100 mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
+                  className="block w-full px-3 py-2 mt-1 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
                 />
               </div>
               <div className="mb-2">
@@ -98,7 +98,7 @@ export default function Signup(props) {
                   id="password"
                   required
                   placeholder="•••••••••••••"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
+                  className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
                 />
               </div>
               <div>
@@ -111,23 +111,11 @@ export default function Signup(props) {
                   id="passwordcheck"
                   required
                   placeholder="•••••••••••••"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
+                  className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-brand sm:text-sm"
                 />
               </div>
-            </div>
-            <div className="mt-3 sm:mt-4 flex">
-              <input
-                type="submit"
-                value={t("create_account")}
-                className="btn btn-primary w-7/12 mr-2 inline-flex justify-center rounded-md border border-transparent cursor-pointer shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:text-sm"
-              />
-              <a
-                onClick={() => signIn("Cal.com", { callbackUrl: (router.query.callbackUrl || "") as string })}
-                className="w-5/12 inline-flex justify-center text-sm text-gray-500 font-medium  border px-4 py-2 rounded btn cursor-pointer">
-                {t("login_instead")}
-              </a>
-            </div>
-          </form>
+            </form>
+          </FormProvider>
         </div>
       </div>
     </div>

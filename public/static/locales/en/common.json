@@ -79,6 +79,7 @@
   "webhook_created_successfully": "Webhook created successfully!",
   "webhook_updated_successfully": "Webhook updated successfully!",
   "webhook_removed_successfully": "Webhook removed successfully!",
+  "payload_template": "Payload Template",
   "dismiss": "Dismiss",
   "no_data_yet": "No data yet",
   "ping_test": "Ping test",
@@ -523,5 +524,7 @@
   "connect_an_additional_calendar": "Connect an additional calendar",
   "conferencing": "Conferencing",
   "calendar": "Calendar",
-  "not_installed": "Not installed"
+  "not_installed": "Not installed",
+  "error_password_mismatch": "Passwords don't match.",
+  "error_required_field": "This field is required."
 }

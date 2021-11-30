@@ -128,7 +128,7 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
         <WithStep step={SetupStep.ConfirmPassword} current={step}>
           <form onSubmit={handleSetup}>
             <div className="mb-4">
-              <label htmlFor="password" className="mt-4 block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block mt-4 text-sm font-medium text-gray-700">
                 {t("password")}
               </label>
               <div className="mt-1">
@@ -152,13 +152,13 @@ const EnableTwoFactorModal = ({ onEnable, onCancel }: EnableTwoFactorModalProps)
             <div className="flex justify-center">
               <img src={dataUri} />
             </div>
-            <p className="text-center text-xs font-mono">{secret}</p>
+            <p className="font-mono text-xs text-center">{secret}</p>
           </>
         </WithStep>
         <WithStep step={SetupStep.EnterTotpCode} current={step}>
           <form onSubmit={handleEnable}>
             <div className="mb-4">
-              <label htmlFor="code" className="mt-4 block text-sm font-medium text-gray-700">
+              <label htmlFor="code" className="block mt-4 text-sm font-medium text-gray-700">
                 {t("code")}
               </label>
               <div className="mt-1">

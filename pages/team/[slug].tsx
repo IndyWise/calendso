@@ -29,12 +29,12 @@ function TeamPage({ team }: inferSSRProps<typeof getServerSideProps>) {
       {team.eventTypes.map((type) => (
         <li
           key={type.id}
-          className="group relative dark:bg-neutral-900 dark:border-0 dark:hover:border-neutral-600 bg-white hover:bg-gray-50 border border-neutral-200 hover:border-brand rounded-sm">
-          <ArrowRightIcon className="absolute transition-opacity h-4 w-4 right-3 top-3 text-black dark:text-white opacity-0 group-hover:opacity-100" />
+          className="relative bg-white border rounded-sm group dark:bg-neutral-900 dark:border-0 dark:hover:border-neutral-600 hover:bg-gray-50 border-neutral-200 hover:border-brand">
+          <ArrowRightIcon className="absolute w-4 h-4 text-black transition-opacity opacity-0 right-3 top-3 dark:text-white group-hover:opacity-100" />
           <Link href={`${team.slug}/${type.slug}`}>
-            <a className="px-6 py-4 flex justify-between">
+            <a className="flex justify-between px-6 py-4">
               <div className="flex-shrink">
-                <h2 className="font-cal font-semibold text-neutral-900 dark:text-white">{type.title}</h2>
+                <h2 className="font-semibold font-cal text-neutral-900 dark:text-white">{type.title}</h2>
                 <EventTypeDescription className="text-sm" eventType={type} />
               </div>
               <div className="mt-1">
@@ -61,14 +61,14 @@ function TeamPage({ team }: inferSSRProps<typeof getServerSideProps>) {
     isReady && (
       <div>
         <HeadSeo title={teamName} description={teamName} />
-        <div className="pt-24 pb-12 px-4">
+        <div className="px-4 pt-24 pb-12">
           <div className="mb-8 text-center">
-            <Avatar alt={teamName} imageSrc={team.logo} className="mx-auto w-20 h-20 rounded-full mb-4" />
+            <Avatar alt={teamName} imageSrc={team.logo} className="w-20 h-20 mx-auto mb-4 rounded-full" />
             <Text variant="headline">{teamName}</Text>
           </div>
           {(showMembers.isOn || !team.eventTypes.length) && <Team team={team} />}
           {!showMembers.isOn && team.eventTypes.length > 0 && (
-            <div className="mx-auto max-w-3xl">
+            <div className="max-w-3xl mx-auto">
               {eventTypes}
 
               <div className="relative mt-12">
@@ -76,13 +76,13 @@ function TeamPage({ team }: inferSSRProps<typeof getServerSideProps>) {
                   <div className="w-full border-t border-gray-200 dark:border-gray-900" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="px-2 bg-gray-100 text-sm text-gray-500 dark:bg-brand dark:text-gray-500">
+                  <span className="px-2 text-sm text-gray-500 bg-gray-100 dark:bg-brand dark:text-gray-500">
                     {t("or")}
                   </span>
                 </div>
               </div>
 
-              <aside className="text-center dark:text-white mt-8">
+              <aside className="mt-8 text-center dark:text-white">
                 <Button
                   color="secondary"
                   EndIcon={ArrowRightIcon}
