@@ -98,11 +98,7 @@ export default function Teams() {
                   )}
                 </div>
                 <div className="flex items-start mb-4">
-                  <Button
-                    type="button"
-                    onClick={() => setShowCreateTeamModal(true)}
-                    className="btn btn-white"
-                  >
+                  <Button type="button" onClick={() => setShowCreateTeamModal(true)} color="secondary">
                     <PlusIcon className="group-hover:text-black text-gray-700 w-3.5 h-3.5 mr-2 inline-block" />
                     {t("new_team")}
                   </Button>
@@ -122,8 +118,7 @@ export default function Teams() {
                           onChange={loadData}
                           key={team.id}
                           team={team}
-                          onActionSelect={noop}
-                        ></TeamListItem>
+                          onActionSelect={noop}></TeamListItem>
                       ))}
                     </ul>
                   </div>
@@ -138,13 +133,11 @@ export default function Teams() {
             className="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-title"
             role="dialog"
-            aria-modal="true"
-          >
+            aria-modal="true">
             <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 z-0 transition-opacity bg-gray-500 bg-opacity-75"
-                aria-hidden="true"
-              ></div>
+                aria-hidden="true"></div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
                 &#8203;
@@ -180,15 +173,14 @@ export default function Teams() {
                     />
                   </div>
                   <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <button type="submit" className="btn btn-primary">
-                      {t("create_team")}
-                    </button>
-                    <button
+                    <Button type="submit">{t("create_team")}</Button>
+                    <Button
                       onClick={() => setShowCreateTeamModal(false)}
                       type="button"
-                      className="mr-2 btn btn-white">
+                      className="mr-2"
+                      color="secondary">
                       {t("cancel")}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>

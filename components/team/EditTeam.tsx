@@ -255,14 +255,10 @@ export default function EditTeam(props: { team: Team | undefined | null; onClose
                 <div>
                   <div className="relative flex items-start">
                     <Dialog>
-                      <DialogTrigger
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className="btn-sm btn-white"
-                      >
-                        <TrashIcon className="group-hover:text-red text-gray-700 w-3.5 h-3.5 mr-2 inline-block" />
-                        {t("disband_team")}
+                      <DialogTrigger asChild>
+                        <Button type="button" color="secondary" StartIcon={TrashIcon}>
+                          {t("disband_team")}
+                        </Button>
                       </DialogTrigger>
                       <ConfirmationDialogContent
                         variety="danger"
